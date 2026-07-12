@@ -1,0 +1,15 @@
+[
+  {
+    "Name": "Nuevo perfil",
+    "Projects": [
+      {
+        "Path": "Delivery.API\\Delivery.API.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "Delivery.Web\\Delivery.Web.csproj",
+        "Action": "Start"
+      }
+    ]
+  }
+]

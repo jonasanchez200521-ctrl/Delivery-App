@@ -1,0 +1,73 @@
+@page "/login"
+@inject AuthApiService AuthApi
+@inject AuthState AuthState
+@inject NavigationManager Navigation
+
+<PageTitle>Ingresar</PageTitle>
+
+<div class="row justify-content-center">
+    <div class="col-md-5">
+        <h3 class="mb-3">Ingresar</h3>
+
+        @if (!string.IsNullOrEmpty(_error))
+        {
+            <div class="alert alert-danger">@_error</div>
+        }
+
+        <EditForm Model="_model" OnValidSubmit="SubmitAsync">
+            <div class="mb-3">
+                <label class="form-label">Correo</label>
+                <InputText class="form-control" @bind-Value="_model.Email" />
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Contraseña</label>
+                <InputText type="password" class="form-control" @bind-Value="_model.Password" />
+            </div>
+            <button class="btn btn-primary w-100" type="submit" disabled="@_loading">
+                @(_loading ? "Ingresando..." : "Ingresar")
+            </button>
+        </EditForm>
+
+        <hr />
+        <p class="text-muted small">
+            Cuentas de prueba: admin@delivery.com / Admin123!, cliente1@delivery.com / Cliente123!,
+            courier1@delivery.com / Courier123!
+        </p>
+        <p>¿No tienes cuenta? <a href="/registro">Regístrate aquí</a></p>
+    </div>
+</div>
+
+@code {
+    private readonly LoginFormModel _model = new();
+    private string? _error;
+    private bool _loading;
+
+    private async Task SubmitAsync()
+    {
+        _loading = true;
+        _error = null;
+        try
+        {
+            var response = await AuthApi.Login(new Models.LoginRequest(_model.Email, _model.Password));
+            if (response is not null)
+            {
+                AuthState.SetSession(response);
+                Navigation.NavigateTo("/");
+            }
+        }
+        catch (ApiException ex)
+        {
+            _error = ex.Message;
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
+    private class LoginFormModel
+    {
+        public string Email { get; set; } = string.Empty;
+        public string Password { get; set; } = string.Empty;
+    }
+}

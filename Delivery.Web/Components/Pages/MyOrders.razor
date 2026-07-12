@@ -1,0 +1,60 @@
+@page "/mis-pedidos"
+@inject OrderApiService OrderApi
+@inject AuthState AuthState
+@inject NavigationManager Navigation
+
+<PageTitle>Mis pedidos</PageTitle>
+
+<h3 class="mb-3">Mis pedidos</h3>
+
+@if (_orders is null)
+{
+    <p>Cargando...</p>
+}
+else if (_orders.Count == 0)
+{
+    <p class="text-muted">Todavía no has realizado pedidos.</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Restaurante</th>
+                <th>Fecha</th>
+                <th>Total</th>
+                <th>Estado</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var order in _orders)
+            {
+                <tr>
+                    <td>@order.Id</td>
+                    <td>@order.RestaurantName</td>
+                    <td>@order.OrderDate.ToLocalTime().ToString("g")</td>
+                    <td>@order.Total.ToString("C")</td>
+                    <td><span class="badge bg-info text-dark">@order.Status</span></td>
+                    <td><a class="btn btn-sm btn-outline-primary" href="/pedido/@order.Id">Ver</a></td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<OrderDto>? _orders;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!AuthState.IsAuthenticated)
+        {
+            Navigation.NavigateTo("/login");
+            return;
+        }
+
+        _orders = await OrderApi.GetMine();
+    }
+}

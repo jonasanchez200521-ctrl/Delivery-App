@@ -1,0 +1,108 @@
+@page "/registro"
+@inject AuthApiService AuthApi
+@inject NavigationManager Navigation
+
+<PageTitle>Crear cuenta</PageTitle>
+
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <h3 class="mb-3">Crear cuenta de cliente</h3>
+
+        @if (!string.IsNullOrEmpty(_error))
+        {
+            <div class="alert alert-danger">@_error</div>
+        }
+        @if (_success)
+        {
+            <div class="alert alert-success">Cuenta creada correctamente. Ya puedes <a href="/login">ingresar</a>.</div>
+        }
+
+        <EditForm Model="_model" OnValidSubmit="SubmitAsync">
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Nombres</label>
+                    <InputText class="form-control" @bind-Value="_model.FirstName" />
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Apellidos</label>
+                    <InputText class="form-control" @bind-Value="_model.LastName" />
+                </div>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Correo</label>
+                <InputText class="form-control" @bind-Value="_model.Email" />
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Contraseña</label>
+                <InputText type="password" class="form-control" @bind-Value="_model.Password" />
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Teléfono</label>
+                <InputText class="form-control" @bind-Value="_model.Phone" />
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Dirección</label>
+                <InputText class="form-control" @bind-Value="_model.Address" />
+            </div>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Género</label>
+                    <InputSelect class="form-select" @bind-Value="_model.Gender">
+                        <option value="@Gender.Male">Masculino</option>
+                        <option value="@Gender.Female">Femenino</option>
+                        <option value="@Gender.Other">Otro</option>
+                    </InputSelect>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Fecha de nacimiento</label>
+                    <InputDate class="form-control" @bind-Value="_model.DateBirth" />
+                </div>
+            </div>
+            <button class="btn btn-primary w-100" type="submit" disabled="@_loading">
+                @(_loading ? "Creando..." : "Crear cuenta")
+            </button>
+        </EditForm>
+    </div>
+</div>
+
+@code {
+    private readonly RegisterFormModel _model = new();
+    private string? _error;
+    private bool _loading;
+    private bool _success;
+
+    private async Task SubmitAsync()
+    {
+        _loading = true;
+        _error = null;
+        try
+        {
+            var request = new RegisterClientRequest(
+                _model.FirstName, _model.LastName, _model.Address, _model.Email,
+                _model.Phone, _model.Gender, _model.Password, _model.DateBirth);
+
+            var result = await AuthApi.Register(request);
+            _success = result is not null;
+        }
+        catch (ApiException ex)
+        {
+            _error = ex.Message;
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
+    private class RegisterFormModel
+    {
+        public string FirstName { get; set; } = string.Empty;
+        public string LastName { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
+        public string Password { get; set; } = string.Empty;
+        public string Phone { get; set; } = string.Empty;
+        public string Address { get; set; } = string.Empty;
+        public Gender Gender { get; set; } = Gender.Other;
+        public DateTime DateBirth { get; set; } = new(2000, 1, 1);
+    }
+}

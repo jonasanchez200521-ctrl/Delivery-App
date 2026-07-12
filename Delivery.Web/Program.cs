@@ -1,4 +1,6 @@
 using Delivery.Web.Components;
+using Delivery.Web.Services;
+using Delivery.Web.State;
 
 namespace Delivery.Web
 {
@@ -8,17 +10,29 @@ namespace Delivery.Web
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Add services to the container.
             builder.Services.AddRazorComponents()
                 .AddInteractiveServerComponents();
 
+            var apiBaseUrl = builder.Configuration["ApiBaseUrl"] ?? "http://localhost:5214";
+
+            builder.Services.AddScoped(_ => new HttpClient { BaseAddress = new Uri(apiBaseUrl) });
+
+            builder.Services.AddScoped<AuthState>();
+            builder.Services.AddScoped<ApiClient>();
+            builder.Services.AddScoped<AuthApiService>();
+            builder.Services.AddScoped<CatalogApiService>();
+            builder.Services.AddScoped<CartApiService>();
+            builder.Services.AddScoped<OrderApiService>();
+            builder.Services.AddScoped<UserApiService>();
+            builder.Services.AddScoped<PromotionApiService>();
+            builder.Services.AddScoped<ReportApiService>();
+            builder.Services.AddScoped<NotificationApiService>();
+
             var app = builder.Build();
 
-            // Configure the HTTP request pipeline.
             if (!app.Environment.IsDevelopment())
             {
                 app.UseExceptionHandler("/Error");
-                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
 

@@ -1,0 +1,122 @@
+@page "/admin/restaurantes"
+@inject CatalogApiService CatalogApi
+@inject AuthState AuthState
+@inject NavigationManager Navigation
+
+<PageTitle>Restaurantes — Admin</PageTitle>
+
+<AdminNav />
+
+@if (!AuthState.IsAuthenticated || AuthState.Role != "Administrator")
+{
+    <p>Esta sección es solo para administradores.</p>
+}
+else
+{
+    <h3 class="mb-3">Restaurantes</h3>
+
+    @if (!string.IsNullOrEmpty(_message))
+    {
+        <div class="alert alert-info">@_message</div>
+    }
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5 class="card-title">Nuevo restaurante</h5>
+            <div class="row g-2">
+                <div class="col-md-4"><input class="form-control" placeholder="Nombre" @bind="_newName" /></div>
+                <div class="col-md-4"><input class="form-control" placeholder="Dirección" @bind="_newAddress" /></div>
+                <div class="col-md-3"><input class="form-control" placeholder="Categoría" @bind="_newCategory" /></div>
+                <div class="col-md-1"><button class="btn btn-primary w-100" @onclick="CreateAsync">Crear</button></div>
+            </div>
+        </div>
+    </div>
+
+    @if (_restaurants is null)
+    {
+        <p>Cargando...</p>
+    }
+    else
+    {
+        <table class="table">
+            <thead><tr><th>Nombre</th><th>Dirección</th><th>Categoría</th><th>Estado</th><th>Rating</th><th></th></tr></thead>
+            <tbody>
+                @foreach (var restaurant in _restaurants)
+                {
+                    <tr>
+                        <td>@restaurant.Name</td>
+                        <td>@restaurant.Address</td>
+                        <td>@restaurant.Category</td>
+                        <td>@restaurant.Status</td>
+                        <td>@restaurant.Rating.ToString("0.0")</td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-secondary"
+                                    @onclick="() => ToggleStatusAsync(restaurant)">
+                                @(restaurant.Status == RestaurantStatus.Active ? "Desactivar" : "Activar")
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger" @onclick="() => DeleteAsync(restaurant.Id)">Eliminar</button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+}
+
+@code {
+    private List<RestaurantDto>? _restaurants;
+    private string _newName = string.Empty;
+    private string _newAddress = string.Empty;
+    private string _newCategory = string.Empty;
+    private string? _message;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!AuthState.IsAuthenticated || AuthState.Role != "Administrator")
+        {
+            Navigation.NavigateTo("/login");
+            return;
+        }
+
+        await LoadAsync();
+    }
+
+    private async Task LoadAsync() => _restaurants = await CatalogApi.GetRestaurants();
+
+    private async Task CreateAsync()
+    {
+        if (string.IsNullOrWhiteSpace(_newName)) return;
+
+        try
+        {
+            await CatalogApi.CreateRestaurant(new CreateRestaurantRequest(_newName, _newAddress, _newCategory));
+            _newName = _newAddress = _newCategory = string.Empty;
+            await LoadAsync();
+        }
+        catch (ApiException ex)
+        {
+            _message = ex.Message;
+        }
+    }
+
+    private async Task ToggleStatusAsync(RestaurantDto restaurant)
+    {
+        var newStatus = restaurant.Status == RestaurantStatus.Active ? RestaurantStatus.Inactive : RestaurantStatus.Active;
+        await CatalogApi.UpdateRestaurant(restaurant.Id,
+            new UpdateRestaurantRequest(restaurant.Name, restaurant.Address, restaurant.Category, newStatus, restaurant.Rating));
+        await LoadAsync();
+    }
+
+    private async Task DeleteAsync(int id)
+    {
+        try
+        {
+            await CatalogApi.DeleteRestaurant(id);
+            await LoadAsync();
+        }
+        catch (ApiException ex)
+        {
+            _message = ex.Message;
+        }
+    }
+}

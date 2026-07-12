@@ -1,0 +1,102 @@
+@page "/admin/categorias"
+@inject CatalogApiService CatalogApi
+@inject AuthState AuthState
+@inject NavigationManager Navigation
+
+<PageTitle>Categorías — Admin</PageTitle>
+
+<AdminNav />
+
+@if (!AuthState.IsAuthenticated || AuthState.Role != "Administrator")
+{
+    <p>Esta sección es solo para administradores.</p>
+}
+else
+{
+    <h3 class="mb-3">Categorías de productos</h3>
+
+    @if (!string.IsNullOrEmpty(_message))
+    {
+        <div class="alert alert-info">@_message</div>
+    }
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="row g-2">
+                <div class="col-md-4"><input class="form-control" placeholder="Nombre" @bind="_newName" /></div>
+                <div class="col-md-6"><input class="form-control" placeholder="Descripción" @bind="_newDescription" /></div>
+                <div class="col-md-2"><button class="btn btn-primary w-100" @onclick="CreateAsync">Crear</button></div>
+            </div>
+        </div>
+    </div>
+
+    @if (_categories is null)
+    {
+        <p>Cargando...</p>
+    }
+    else
+    {
+        <table class="table">
+            <thead><tr><th>Nombre</th><th>Descripción</th><th></th></tr></thead>
+            <tbody>
+                @foreach (var category in _categories)
+                {
+                    <tr>
+                        <td>@category.Name</td>
+                        <td>@category.Description</td>
+                        <td><button class="btn btn-sm btn-outline-danger" @onclick="() => DeleteAsync(category.Id)">Eliminar</button></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+}
+
+@code {
+    private List<CategoryDto>? _categories;
+    private string _newName = string.Empty;
+    private string _newDescription = string.Empty;
+    private string? _message;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!AuthState.IsAuthenticated || AuthState.Role != "Administrator")
+        {
+            Navigation.NavigateTo("/login");
+            return;
+        }
+
+        await LoadAsync();
+    }
+
+    private async Task LoadAsync() => _categories = await CatalogApi.GetCategories();
+
+    private async Task CreateAsync()
+    {
+        if (string.IsNullOrWhiteSpace(_newName)) return;
+
+        try
+        {
+            await CatalogApi.CreateCategory(new CreateCategoryRequest(_newName, _newDescription));
+            _newName = _newDescription = string.Empty;
+            await LoadAsync();
+        }
+        catch (ApiException ex)
+        {
+            _message = ex.Message;
+        }
+    }
+
+    private async Task DeleteAsync(int id)
+    {
+        try
+        {
+            await CatalogApi.DeleteCategory(id);
+            await LoadAsync();
+        }
+        catch (ApiException ex)
+        {
+            _message = ex.Message;
+        }
+    }
+}

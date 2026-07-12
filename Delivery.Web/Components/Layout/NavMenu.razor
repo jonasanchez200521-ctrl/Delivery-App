@@ -1,0 +1,73 @@
+@implements IDisposable
+@inject AuthState AuthState
+@inject NavigationManager Navigation
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
+    <div class="container">
+        <a class="navbar-brand fw-bold" href="/">🛵 Delivery.NET</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navMenu">
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item"><a class="nav-link" href="/">Restaurantes</a></li>
+
+                @if (AuthState.Role == "Client")
+                {
+                    <li class="nav-item"><a class="nav-link" href="/carrito">Carrito</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/mis-pedidos">Mis pedidos</a></li>
+                }
+
+                @if (AuthState.Role == "Courier")
+                {
+                    <li class="nav-item"><a class="nav-link" href="/repartidor">Mis entregas</a></li>
+                }
+
+                @if (AuthState.Role == "Administrator")
+                {
+                    <li class="nav-item"><a class="nav-link" href="/admin">Panel admin</a></li>
+                }
+
+                @if (AuthState.IsAuthenticated)
+                {
+                    <li class="nav-item"><a class="nav-link" href="/notificaciones">Notificaciones</a></li>
+                }
+            </ul>
+
+            <ul class="navbar-nav">
+                @if (AuthState.IsAuthenticated)
+                {
+                    <li class="nav-item d-flex align-items-center text-light me-3">
+                        @AuthState.CurrentUser?.FirstName (@AuthState.Role)
+                    </li>
+                    <li class="nav-item">
+                        <button class="btn btn-outline-light btn-sm" @onclick="LogoutAsync">Cerrar sesión</button>
+                    </li>
+                }
+                else
+                {
+                    <li class="nav-item"><a class="nav-link" href="/login">Ingresar</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/registro">Registrarme</a></li>
+                }
+            </ul>
+        </div>
+    </div>
+</nav>
+
+@code {
+    protected override void OnInitialized()
+    {
+        AuthState.OnChange += StateHasChanged;
+    }
+
+    private void LogoutAsync()
+    {
+        AuthState.Clear();
+        Navigation.NavigateTo("/", forceLoad: false);
+    }
+
+    public void Dispose()
+    {
+        AuthState.OnChange -= StateHasChanged;
+    }
+}

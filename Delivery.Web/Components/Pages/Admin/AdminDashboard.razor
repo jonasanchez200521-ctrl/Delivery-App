@@ -1,0 +1,96 @@
+@page "/admin"
+@inject ReportApiService ReportApi
+@inject AuthState AuthState
+@inject NavigationManager Navigation
+
+<PageTitle>Panel admin</PageTitle>
+
+<AdminNav />
+
+@if (!AuthState.IsAuthenticated || AuthState.Role != "Administrator")
+{
+    <p>Esta sección es solo para administradores.</p>
+}
+else if (_report is null)
+{
+    <p>Cargando...</p>
+}
+else
+{
+    <h3 class="mb-3">Estadísticas generales</h3>
+
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="card text-bg-primary">
+                <div class="card-body">
+                    <h6>Pedidos totales</h6>
+                    <h3>@_report.TotalOrders</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-bg-success">
+                <div class="card-body">
+                    <h6>Ventas totales</h6>
+                    <h3>@_report.TotalSales.ToString("C")</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-bg-info">
+                <div class="card-body">
+                    <h6>Pagos procesados</h6>
+                    <h3>@_report.TotalPayments</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-bg-warning">
+                <div class="card-body">
+                    <h6>Ingresos cobrados</h6>
+                    <h3>@_report.TotalRevenueCollected.ToString("C")</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <h5>Pedidos por estado</h5>
+            <table class="table table-sm">
+                <tbody>
+                    @foreach (var kv in _report.OrdersByStatus)
+                    {
+                        <tr><td>@kv.Key</td><td>@kv.Value</td></tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        <div class="col-md-6">
+            <h5>Usuarios por tipo</h5>
+            <table class="table table-sm">
+                <tbody>
+                    @foreach (var kv in _report.UsersByType)
+                    {
+                        <tr><td>@kv.Key</td><td>@kv.Value</td></tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
+
+@code {
+    private ReportDto? _report;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!AuthState.IsAuthenticated || AuthState.Role != "Administrator")
+        {
+            Navigation.NavigateTo("/login");
+            return;
+        }
+
+        _report = await ReportApi.GetReport();
+    }
+}

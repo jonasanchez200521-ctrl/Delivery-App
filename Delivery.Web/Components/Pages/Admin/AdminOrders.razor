@@ -1,0 +1,54 @@
+@page "/admin/pedidos"
+@inject OrderApiService OrderApi
+@inject AuthState AuthState
+@inject NavigationManager Navigation
+
+<PageTitle>Pedidos — Admin</PageTitle>
+
+<AdminNav />
+
+@if (!AuthState.IsAuthenticated || AuthState.Role != "Administrator")
+{
+    <p>Esta sección es solo para administradores.</p>
+}
+else if (_orders is null)
+{
+    <p>Cargando...</p>
+}
+else
+{
+    <h3 class="mb-3">Todos los pedidos</h3>
+
+    <table class="table">
+        <thead><tr><th>#</th><th>Cliente</th><th>Restaurante</th><th>Repartidor</th><th>Total</th><th>Estado</th><th></th></tr></thead>
+        <tbody>
+            @foreach (var order in _orders)
+            {
+                <tr>
+                    <td>@order.Id</td>
+                    <td>@order.ClientName</td>
+                    <td>@order.RestaurantName</td>
+                    <td>@(order.CourierName ?? "Sin asignar")</td>
+                    <td>@order.Total.ToString("C")</td>
+                    <td><span class="badge bg-info text-dark">@order.Status</span></td>
+                    <td><a class="btn btn-sm btn-outline-primary" href="/pedido/@order.Id">Gestionar</a></td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<OrderDto>? _orders;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!AuthState.IsAuthenticated || AuthState.Role != "Administrator")
+        {
+            Navigation.NavigateTo("/login");
+            return;
+        }
+
+        _orders = await OrderApi.GetAll();
+    }
+}

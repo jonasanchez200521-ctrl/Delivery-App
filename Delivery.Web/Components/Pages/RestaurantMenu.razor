@@ -1,0 +1,77 @@
+@page "/restaurante/{RestaurantId:int}"
+@inject CatalogApiService CatalogApi
+@inject CartApiService CartApi
+@inject AuthState AuthState
+@inject NavigationManager Navigation
+
+<PageTitle>Menú</PageTitle>
+
+@if (_restaurant is null)
+{
+    <p>Cargando...</p>
+}
+else
+{
+    <h3>@_restaurant.Name</h3>
+    <p class="text-muted">@_restaurant.Category — @_restaurant.Address</p>
+
+    @if (!string.IsNullOrEmpty(_message))
+    {
+        <div class="alert alert-info">@_message</div>
+    }
+
+    <div class="row g-3">
+        @foreach (var product in _products)
+        {
+            <div class="col-md-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">@product.Name</h5>
+                        <p class="card-text small">@product.Description</p>
+                        <p class="card-text"><strong>@product.Price.ToString("C")</strong> · @product.CategoryName</p>
+
+                        @if (AuthState.Role == "Client")
+                        {
+                            <button class="btn btn-outline-primary btn-sm" @onclick="() => AddToCartAsync(product.Id)">
+                                Agregar al carrito
+                            </button>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+@code {
+    [Parameter] public int RestaurantId { get; set; }
+
+    private RestaurantDto? _restaurant;
+    private List<ProductDto> _products = [];
+    private string? _message;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _restaurant = await CatalogApi.GetRestaurant(RestaurantId);
+        _products = await CatalogApi.GetProducts(RestaurantId);
+    }
+
+    private async Task AddToCartAsync(int productId)
+    {
+        if (!AuthState.IsAuthenticated)
+        {
+            Navigation.NavigateTo("/login");
+            return;
+        }
+
+        try
+        {
+            await CartApi.AddItem(new AddCartItemRequest(productId, 1));
+            _message = "Producto agregado al carrito.";
+        }
+        catch (ApiException ex)
+        {
+            _message = ex.Message;
+        }
+    }
+}

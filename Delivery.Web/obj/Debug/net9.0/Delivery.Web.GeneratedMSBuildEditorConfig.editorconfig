@@ -27,12 +27,80 @@ build_property.EnableCodeStyleSeverity =
 build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xBcHAucmF6b3I=
 build_metadata.AdditionalFiles.CssScope = 
 
+[C:/Users/User/OneDrive/Documents/GitHub/Delivery.Net/Delivery/Delivery.Web/Components/Layout/NavMenu.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xMYXlvdXRcTmF2TWVudS5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/User/OneDrive/Documents/GitHub/Delivery.Net/Delivery/Delivery.Web/Components/Pages/Admin/AdminCategories.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xBZG1pblxBZG1pbkNhdGVnb3JpZXMucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/User/OneDrive/Documents/GitHub/Delivery.Net/Delivery/Delivery.Web/Components/Pages/Admin/AdminDashboard.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xBZG1pblxBZG1pbkRhc2hib2FyZC5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/User/OneDrive/Documents/GitHub/Delivery.Net/Delivery/Delivery.Web/Components/Pages/Admin/AdminNav.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xBZG1pblxBZG1pbk5hdi5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/User/OneDrive/Documents/GitHub/Delivery.Net/Delivery/Delivery.Web/Components/Pages/Admin/AdminOrders.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xBZG1pblxBZG1pbk9yZGVycy5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/User/OneDrive/Documents/GitHub/Delivery.Net/Delivery/Delivery.Web/Components/Pages/Admin/AdminProducts.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xBZG1pblxBZG1pblByb2R1Y3RzLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/User/OneDrive/Documents/GitHub/Delivery.Net/Delivery/Delivery.Web/Components/Pages/Admin/AdminPromotions.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xBZG1pblxBZG1pblByb21vdGlvbnMucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/User/OneDrive/Documents/GitHub/Delivery.Net/Delivery/Delivery.Web/Components/Pages/Admin/AdminRestaurants.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xBZG1pblxBZG1pblJlc3RhdXJhbnRzLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/User/OneDrive/Documents/GitHub/Delivery.Net/Delivery/Delivery.Web/Components/Pages/Admin/AdminUsers.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xBZG1pblxBZG1pblVzZXJzLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/User/OneDrive/Documents/GitHub/Delivery.Net/Delivery/Delivery.Web/Components/Pages/Cart.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xDYXJ0LnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/User/OneDrive/Documents/GitHub/Delivery.Net/Delivery/Delivery.Web/Components/Pages/CourierOrders.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xDb3VyaWVyT3JkZXJzLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
 [C:/Users/User/OneDrive/Documents/GitHub/Delivery.Net/Delivery/Delivery.Web/Components/Pages/Error.razor]
 build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xFcnJvci5yYXpvcg==
 build_metadata.AdditionalFiles.CssScope = 
 
 [C:/Users/User/OneDrive/Documents/GitHub/Delivery.Net/Delivery/Delivery.Web/Components/Pages/Home.razor]
 build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xIb21lLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/User/OneDrive/Documents/GitHub/Delivery.Net/Delivery/Delivery.Web/Components/Pages/Login.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xMb2dpbi5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/User/OneDrive/Documents/GitHub/Delivery.Net/Delivery/Delivery.Web/Components/Pages/MyOrders.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xNeU9yZGVycy5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/User/OneDrive/Documents/GitHub/Delivery.Net/Delivery/Delivery.Web/Components/Pages/Notifications.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xOb3RpZmljYXRpb25zLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/User/OneDrive/Documents/GitHub/Delivery.Net/Delivery/Delivery.Web/Components/Pages/OrderDetail.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xPcmRlckRldGFpbC5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/User/OneDrive/Documents/GitHub/Delivery.Net/Delivery/Delivery.Web/Components/Pages/Register.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xSZWdpc3Rlci5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/User/OneDrive/Documents/GitHub/Delivery.Net/Delivery/Delivery.Web/Components/Pages/RestaurantMenu.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xSZXN0YXVyYW50TWVudS5yYXpvcg==
 build_metadata.AdditionalFiles.CssScope = 
 
 [C:/Users/User/OneDrive/Documents/GitHub/Delivery.Net/Delivery/Delivery.Web/Components/Routes.razor]

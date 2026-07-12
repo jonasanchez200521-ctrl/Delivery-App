@@ -1,7 +1,24 @@
 {
   "Version": 1,
   "WorkspaceRootPath": "C:\\Users\\User\\OneDrive\\Documents\\GitHub\\Delivery.Net\\Delivery\\",
-  "Documents": [],
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{834A6C3B-28F4-169E-6FC9-FD72E6D955A2}|Delivery.Web\\Delivery.Web.csproj|c:\\users\\user\\onedrive\\documents\\github\\delivery.net\\delivery\\delivery.web\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{834A6C3B-28F4-169E-6FC9-FD72E6D955A2}|Delivery.Web\\Delivery.Web.csproj|solutionrelative:delivery.web\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{834A6C3B-28F4-169E-6FC9-FD72E6D955A2}|Delivery.Web\\Delivery.Web.csproj|c:\\users\\user\\onedrive\\documents\\github\\delivery.net\\delivery\\delivery.web\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{834A6C3B-28F4-169E-6FC9-FD72E6D955A2}|Delivery.Web\\Delivery.Web.csproj|solutionrelative:delivery.web\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{3F43F364-300A-F669-97C3-CD0D0088AD88}|Delivery.API\\Delivery.API.csproj|c:\\users\\user\\onedrive\\documents\\github\\delivery.net\\delivery\\delivery.api\\appsettings.development.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{3F43F364-300A-F669-97C3-CD0D0088AD88}|Delivery.API\\Delivery.API.csproj|solutionrelative:delivery.api\\appsettings.development.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{3F43F364-300A-F669-97C3-CD0D0088AD88}|Delivery.API\\Delivery.API.csproj|c:\\users\\user\\onedrive\\documents\\github\\delivery.net\\delivery\\delivery.api\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{3F43F364-300A-F669-97C3-CD0D0088AD88}|Delivery.API\\Delivery.API.csproj|solutionrelative:delivery.api\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+    }
+  ],
   "DocumentGroupContainers": [
     {
       "Orientation": 0,
@@ -9,7 +26,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 169,
-          "SelectedChildIndex": -1,
+          "SelectedChildIndex": 8,
           "Children": [
             {
               "$type": "Bookmark",
@@ -42,6 +59,58 @@
             {
               "$type": "Bookmark",
               "Name": "ST:0:0:{0ad07096-bba9-4900-a651-0598d26f6d24}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "Program.cs",
+              "DocumentMoniker": "C:\\Users\\User\\OneDrive\\Documents\\GitHub\\Delivery.Net\\Delivery\\Delivery.Web\\Program.cs",
+              "RelativeDocumentMoniker": "Delivery.Web\\Program.cs",
+              "ToolTip": "C:\\Users\\User\\OneDrive\\Documents\\GitHub\\Delivery.Net\\Delivery\\Delivery.Web\\Program.cs",
+              "RelativeToolTip": "Delivery.Web\\Program.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAwAAAAxAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-12T07:15:35.604Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "appsettings.json",
+              "DocumentMoniker": "C:\\Users\\User\\OneDrive\\Documents\\GitHub\\Delivery.Net\\Delivery\\Delivery.Web\\appsettings.json",
+              "RelativeDocumentMoniker": "Delivery.Web\\appsettings.json",
+              "ToolTip": "C:\\Users\\User\\OneDrive\\Documents\\GitHub\\Delivery.Net\\Delivery\\Delivery.Web\\appsettings.json",
+              "RelativeToolTip": "Delivery.Web\\appsettings.json",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2026-07-12T07:15:31.582Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "appsettings.Development.json",
+              "DocumentMoniker": "C:\\Users\\User\\OneDrive\\Documents\\GitHub\\Delivery.Net\\Delivery\\Delivery.API\\appsettings.Development.json",
+              "RelativeDocumentMoniker": "Delivery.API\\appsettings.Development.json",
+              "ToolTip": "C:\\Users\\User\\OneDrive\\Documents\\GitHub\\Delivery.Net\\Delivery\\Delivery.API\\appsettings.Development.json",
+              "RelativeToolTip": "Delivery.API\\appsettings.Development.json",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAABqAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2026-07-12T06:53:44.83Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "appsettings.json",
+              "DocumentMoniker": "C:\\Users\\User\\OneDrive\\Documents\\GitHub\\Delivery.Net\\Delivery\\Delivery.API\\appsettings.json",
+              "RelativeDocumentMoniker": "Delivery.API\\appsettings.json",
+              "ToolTip": "C:\\Users\\User\\OneDrive\\Documents\\GitHub\\Delivery.Net\\Delivery\\Delivery.API\\appsettings.json",
+              "RelativeToolTip": "Delivery.API\\appsettings.json",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAwAAAAvAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2026-07-12T06:49:07.556Z",
+              "EditorCaption": ""
             }
           ]
         },

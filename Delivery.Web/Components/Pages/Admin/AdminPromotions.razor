@@ -1,0 +1,109 @@
+@page "/admin/promociones"
+@inject PromotionApiService PromotionApi
+@inject AuthState AuthState
+@inject NavigationManager Navigation
+
+<PageTitle>Promociones — Admin</PageTitle>
+
+<AdminNav />
+
+@if (!AuthState.IsAuthenticated || AuthState.Role != "Administrator")
+{
+    <p>Esta sección es solo para administradores.</p>
+}
+else
+{
+    <h3 class="mb-3">Promociones</h3>
+
+    @if (!string.IsNullOrEmpty(_message))
+    {
+        <div class="alert alert-info">@_message</div>
+    }
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="row g-2">
+                <div class="col-md-2"><input class="form-control" placeholder="Código" @bind="_code" /></div>
+                <div class="col-md-2"><input type="number" class="form-control" placeholder="% Descuento" @bind="_discount" /></div>
+                <div class="col-md-3"><input type="date" class="form-control" @bind="_startDate" /></div>
+                <div class="col-md-3"><input type="date" class="form-control" @bind="_endDate" /></div>
+                <div class="col-md-2"><button class="btn btn-primary w-100" @onclick="CreateAsync">Crear</button></div>
+            </div>
+        </div>
+    </div>
+
+    @if (_promotions is null)
+    {
+        <p>Cargando...</p>
+    }
+    else
+    {
+        <table class="table">
+            <thead><tr><th>Código</th><th>Descuento</th><th>Vigencia</th><th>Activa</th><th></th></tr></thead>
+            <tbody>
+                @foreach (var promo in _promotions)
+                {
+                    <tr>
+                        <td>@promo.Code</td>
+                        <td>@promo.Discount %</td>
+                        <td>@promo.StartDate.ToShortDateString() - @promo.EndDate.ToShortDateString()</td>
+                        <td>@(promo.IsActive ? "Sí" : "No")</td>
+                        <td><button class="btn btn-sm btn-outline-danger" @onclick="() => DeleteAsync(promo.Id)">Eliminar</button></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+}
+
+@code {
+    private List<PromotionDto>? _promotions;
+    private string _code = string.Empty;
+    private decimal _discount;
+    private DateTime _startDate = DateTime.Today;
+    private DateTime _endDate = DateTime.Today.AddMonths(1);
+    private string? _message;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!AuthState.IsAuthenticated || AuthState.Role != "Administrator")
+        {
+            Navigation.NavigateTo("/login");
+            return;
+        }
+
+        await LoadAsync();
+    }
+
+    private async Task LoadAsync() => _promotions = await PromotionApi.GetAll();
+
+    private async Task CreateAsync()
+    {
+        if (string.IsNullOrWhiteSpace(_code)) return;
+
+        try
+        {
+            await PromotionApi.Create(new CreatePromotionRequest(_code, _discount, _startDate, _endDate));
+            _code = string.Empty;
+            _discount = 0;
+            await LoadAsync();
+        }
+        catch (ApiException ex)
+        {
+            _message = ex.Message;
+        }
+    }
+
+    private async Task DeleteAsync(int id)
+    {
+        try
+        {
+            await PromotionApi.Delete(id);
+            await LoadAsync();
+        }
+        catch (ApiException ex)
+        {
+            _message = ex.Message;
+        }
+    }
+}
