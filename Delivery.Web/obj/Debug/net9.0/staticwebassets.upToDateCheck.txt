@@ -1,2 +1,0 @@
-wwwroot\app.css
-C:\Users\User\OneDrive\Documents\GitHub\Delivery.Net\Delivery\Delivery.Web\wwwroot\app.css

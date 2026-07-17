@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="Nami.API/Nami.API.csproj" />
+  <Project Path="Nami.Web/Nami.Web.csproj" />
+</Solution>

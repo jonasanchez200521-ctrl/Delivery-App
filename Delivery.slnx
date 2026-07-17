@@ -1,4 +1,0 @@
-<Solution>
-  <Project Path="Delivery.API/Delivery.API.csproj" />
-  <Project Path="Delivery.Web/Delivery.Web.csproj" />
-</Solution>
