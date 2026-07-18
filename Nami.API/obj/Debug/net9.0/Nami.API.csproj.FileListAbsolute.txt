@@ -141,4 +141,3 @@ C:\Users\User\OneDrive\Documents\GitHub\Delivery.Net\Delivery\Nami.API\obj\Debug
 C:\Users\User\OneDrive\Documents\GitHub\Delivery.Net\Delivery\Nami.API\obj\Debug\net9.0\Nami.API.pdb
 C:\Users\User\OneDrive\Documents\GitHub\Delivery.Net\Delivery\Nami.API\obj\Debug\net9.0\Nami.API.genruntimeconfig.cache
 C:\Users\User\OneDrive\Documents\GitHub\Delivery.Net\Delivery\Nami.API\obj\Debug\net9.0\ref\Nami.API.dll
-C:\Users\User\OneDrive\Documents\GitHub\Delivery.Net\Delivery\Nami.API\obj\Debug\net9.0\staticwebassets.upToDateCheck.txt

@@ -36,3 +36,512 @@ h1:focus {
 .form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
     text-align: start;
 }
+
+/* ============================================================
+   Ñami — sistema de diseño
+   ============================================================ */
+
+@keyframes namiFade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes namiUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes namiPop { 0% { transform: scale(1); } 40% { transform: scale(1.35); } 100% { transform: scale(1); } }
+@keyframes namiPulse { 0%, 100% { opacity: 1; } 50% { opacity: .45; } }
+
+[data-nami-theme="dark"] {
+    --nami-bg: #1a1a1f;
+    --nami-panel: #212128;
+    --nami-card: #222229;
+    --nami-border: #2e2e37;
+    --nami-text: #f4f2ec;
+    --nami-muted: #9d9aa4;
+    --nami-accent: #EF9F27;
+    --nami-accent-ink: #1a1a1f;
+    --nami-accent-soft: rgba(239, 159, 39, .15);
+    --nami-input: #26262e;
+    --nami-ph1: #26262e;
+    --nami-ph2: #2c2c35;
+    --nami-shadow: 0 10px 30px rgba(0, 0, 0, .35);
+    --nami-success: #4ade80;
+    --nami-danger: #f87171;
+    --nami-warning: #fbbf24;
+}
+
+[data-nami-theme="light"] {
+    --nami-bg: #faf8f3;
+    --nami-panel: #ffffff;
+    --nami-card: #ffffff;
+    --nami-border: #e9e4da;
+    --nami-text: #26221b;
+    --nami-muted: #7d7768;
+    --nami-accent: #e08c10;
+    --nami-accent-ink: #ffffff;
+    --nami-accent-soft: rgba(239, 159, 39, .18);
+    --nami-input: #ffffff;
+    --nami-ph1: #f1ede4;
+    --nami-ph2: #e9e4d8;
+    --nami-shadow: 0 10px 30px rgba(40, 30, 10, .08);
+    --nami-success: #16a34a;
+    --nami-danger: #dc2626;
+    --nami-warning: #d97706;
+}
+
+html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--nami-bg);
+    color: var(--nami-text);
+}
+
+body {
+    font-family: 'Instrument Sans', sans-serif;
+    transition: background .25s, color .25s;
+}
+
+.nami-root {
+    min-height: 100vh;
+    background: var(--nami-bg);
+    color: var(--nami-text);
+    font-family: 'Instrument Sans', sans-serif;
+    transition: background .25s, color .25s;
+}
+
+.nami-heading, h1.nami-h, h2.nami-h, h3.nami-h, h4.nami-h {
+    font-family: 'Sora', sans-serif;
+    font-weight: 800;
+    letter-spacing: -0.4px;
+}
+
+/* :where() keeps these at zero specificity so any component class (.nami-btn-primary,
+   .nami-chip-active, etc.) always wins its own color, even on an <a>, even on :hover. */
+a { text-decoration: none; }
+:where(a) { color: var(--nami-accent); }
+:where(a:hover) { color: var(--nami-accent); filter: brightness(1.15); }
+
+input::placeholder, textarea::placeholder { color: inherit; opacity: .45; }
+
+.nami-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: clamp(16px, 4vw, 40px);
+}
+
+.nami-fade { animation: namiFade .35s ease both; }
+.nami-up { animation: namiUp .28s ease both; }
+
+/* ---------- Buttons ---------- */
+
+.nami-btn {
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 700;
+    padding: 10px 20px;
+    border-radius: 999px;
+    border: none;
+    background: none;
+    color: var(--nami-text);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: filter .15s, border-color .15s, background-color .15s, color .15s, transform .1s;
+    white-space: nowrap;
+}
+.nami-btn:disabled { opacity: .55; cursor: not-allowed; }
+.nami-btn:active:not(:disabled) { transform: scale(.98); }
+
+.nami-btn-primary {
+    background: var(--nami-accent);
+    color: var(--nami-accent-ink);
+    box-shadow: 0 8px 24px var(--nami-accent-soft);
+}
+.nami-btn-primary:hover:not(:disabled) { filter: brightness(1.08); }
+
+.nami-btn-outline {
+    border: 1px solid var(--nami-accent);
+    color: var(--nami-accent);
+    background: none;
+}
+.nami-btn-outline:hover:not(:disabled) { background: var(--nami-accent-soft); }
+
+.nami-btn-ghost {
+    border: 1px solid var(--nami-border);
+    background: var(--nami-panel);
+    color: var(--nami-muted);
+}
+.nami-btn-ghost:hover:not(:disabled) { border-color: var(--nami-accent); color: var(--nami-text); }
+
+.nami-btn-sm { padding: 7px 14px; font-size: 12.5px; }
+.nami-btn-block { width: 100%; }
+
+.nami-icon-btn {
+    cursor: pointer;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 1px solid var(--nami-border);
+    background: var(--nami-panel);
+    color: var(--nami-text);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    transition: border-color .15s, color .15s;
+}
+.nami-icon-btn:hover { border-color: var(--nami-accent); color: var(--nami-accent); }
+
+/* ---------- Inputs ---------- */
+
+.nami-input, .nami-textarea, .nami-select {
+    width: 100%;
+    box-sizing: border-box;
+    font-family: inherit;
+    font-size: 14.5px;
+    padding: 13px 18px;
+    border-radius: 14px;
+    border: 1px solid var(--nami-border);
+    background: var(--nami-input);
+    color: var(--nami-text);
+    outline: none;
+    transition: border-color .15s;
+}
+.nami-input:focus, .nami-textarea:focus, .nami-select:focus { border-color: var(--nami-accent); }
+.nami-textarea { resize: none; }
+
+.nami-input-pill {
+    border-radius: 999px;
+    padding: 14px 20px;
+}
+
+.nami-label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--nami-muted);
+    margin-bottom: 6px;
+}
+
+/* ---------- Cards / chips / badges ---------- */
+
+.nami-card {
+    background: var(--nami-card);
+    border: 1px solid var(--nami-border);
+    border-radius: 18px;
+    transition: transform .15s, box-shadow .15s, border-color .15s;
+}
+.nami-card-hover:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--nami-shadow);
+    border-color: var(--nami-accent);
+    cursor: pointer;
+}
+
+.nami-panel {
+    background: var(--nami-panel);
+    border: 1px solid var(--nami-border);
+    border-radius: 20px;
+}
+
+.nami-chip {
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 13.5px;
+    font-weight: 600;
+    padding: 9px 18px;
+    border-radius: 999px;
+    border: 1px solid var(--nami-border);
+    background: var(--nami-panel);
+    color: var(--nami-muted);
+    transition: border-color .15s, background-color .15s, color .15s;
+}
+.nami-chip:hover { border-color: var(--nami-accent); }
+.nami-chip-active {
+    background: var(--nami-accent);
+    border-color: var(--nami-accent);
+    color: var(--nami-accent-ink);
+}
+
+.nami-pill-tag {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--nami-muted);
+    border: 1px solid var(--nami-border);
+    padding: 4px 11px;
+    border-radius: 999px;
+    display: inline-block;
+}
+
+.nami-rating {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: var(--nami-accent-soft);
+    color: var(--nami-accent);
+    font-size: 13px;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 999px;
+}
+
+.nami-badge {
+    font-size: 12px;
+    font-weight: 700;
+    padding: 4px 12px;
+    border-radius: 999px;
+    display: inline-block;
+}
+
+.nami-photo {
+    background: repeating-linear-gradient(45deg, var(--nami-ph1) 0 12px, var(--nami-ph2) 12px 24px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--nami-muted);
+    font-family: monospace;
+    font-size: 11px;
+    background-size: cover;
+    background-position: center;
+}
+
+/* ---------- Skeleton loaders ---------- */
+
+.nami-skel {
+    background: var(--nami-ph2);
+    border-radius: 6px;
+    animation: namiPulse 1.2s ease infinite;
+}
+
+/* ---------- Modal ---------- */
+
+.nami-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 1050;
+    background: rgba(12, 12, 16, .62);
+    backdrop-filter: blur(3px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    animation: namiFade .2s ease;
+}
+
+.nami-modal {
+    width: 100%;
+    max-width: 440px;
+    max-height: 90vh;
+    overflow-y: auto;
+    background: var(--nami-panel);
+    border: 1px solid var(--nami-border);
+    border-radius: 24px;
+    box-shadow: var(--nami-shadow);
+    animation: namiUp .28s ease;
+}
+
+/* ---------- Stepper ---------- */
+
+.nami-stepper { display: flex; }
+.nami-step {
+    flex: 1;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+.nami-step::before {
+    content: '';
+    position: absolute;
+    top: 16px;
+    left: -50%;
+    width: 100%;
+    height: 3px;
+    background: var(--nami-border);
+    z-index: 0;
+}
+.nami-step:first-child::before { display: none; }
+.nami-step-dot {
+    position: relative;
+    z-index: 1;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 800;
+    border: 2px solid var(--nami-border);
+    background: var(--nami-card);
+    color: var(--nami-muted);
+}
+.nami-step-label {
+    font-size: clamp(10px, 1.4vw, 13px);
+    font-weight: 600;
+    color: var(--nami-muted);
+    text-align: center;
+    line-height: 1.25;
+    padding: 0 4px;
+}
+.nami-step-done::before { background: var(--nami-accent); }
+.nami-step-done .nami-step-dot { background: var(--nami-accent); border-color: var(--nami-accent); color: var(--nami-accent-ink); }
+.nami-step-done .nami-step-label { color: var(--nami-text); }
+.nami-step-current .nami-step-dot { background: var(--nami-accent-soft); border-color: var(--nami-accent); color: var(--nami-accent); box-shadow: 0 0 0 5px var(--nami-accent-soft); }
+.nami-step-current .nami-step-label { color: var(--nami-text); }
+
+/* ---------- Cart badge bump ---------- */
+
+.nami-cart-badge {
+    position: absolute;
+    top: -7px;
+    right: -7px;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 5px;
+    border-radius: 999px;
+    background: var(--nami-accent);
+    color: var(--nami-accent-ink);
+    font-size: 12px;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+.nami-cart-bump { animation: namiPop .35s ease; }
+
+/* ---------- Layout helpers ---------- */
+
+.nami-grid-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+.nami-grid-2 {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 22px;
+    align-items: start;
+}
+
+.nami-scroll-x {
+    display: flex;
+    gap: 16px;
+    overflow-x: auto;
+    scroll-behavior: smooth;
+    padding: 4px 4px 12px;
+    scrollbar-width: none;
+}
+.nami-scroll-x::-webkit-scrollbar { display: none; }
+
+/* ---------- Navbar ---------- */
+
+.nami-navbar {
+    position: sticky;
+    top: 0;
+    z-index: 1030;
+    background: var(--nami-bg);
+    border-bottom: 1px solid var(--nami-border);
+    padding: 0 clamp(16px, 4vw, 40px);
+}
+.nami-navbar-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    height: 64px;
+    flex-wrap: wrap;
+}
+.nami-logo {
+    cursor: pointer;
+    font-family: 'Sora', sans-serif;
+    font-weight: 800;
+    font-size: 24px;
+    letter-spacing: -0.5px;
+    color: var(--nami-text) !important;
+    display: inline-flex;
+    align-items: center;
+    gap: 1px;
+}
+.nami-logo-dot { color: var(--nami-accent); font-size: 30px; line-height: 0; }
+.nami-avatar {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: var(--nami-accent-soft);
+    color: var(--nami-accent);
+    font-weight: 800;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--nami-accent);
+    flex-shrink: 0;
+}
+
+/* ---------- Floating bar ---------- */
+
+.nami-floating-bar {
+    position: sticky;
+    bottom: 16px;
+    z-index: 20;
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+}
+.nami-floating-bar-inner {
+    width: 100%;
+    max-width: 420px;
+    background: var(--nami-panel);
+    border: 1px solid var(--nami-border);
+    box-shadow: var(--nami-shadow);
+    border-radius: 999px;
+    padding: 8px;
+}
+
+/* ---------- Map ---------- */
+
+.nami-map {
+    position: relative;
+    z-index: 0;
+    height: 300px;
+    background: var(--nami-card);
+    border-radius: 0;
+}
+.leaflet-container { font-family: 'Instrument Sans', sans-serif; }
+
+/* ---------- Tables (admin) ---------- */
+
+.nami-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13.5px;
+}
+.nami-table th {
+    text-align: left;
+    color: var(--nami-muted);
+    font-weight: 600;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: .6px;
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--nami-border);
+}
+.nami-table td {
+    padding: 13px 12px;
+    border-bottom: 1px solid var(--nami-border);
+}
+
+/* ---------- Bootstrap overrides so it plays along with the theme ---------- */
+
+.nami-root .form-control, .nami-root .form-select {
+    background: var(--nami-input);
+    color: var(--nami-text);
+    border-color: var(--nami-border);
+}
+.nami-root .form-control:focus, .nami-root .form-select:focus {
+    background: var(--nami-input);
+    color: var(--nami-text);
+    border-color: var(--nami-accent);
+    box-shadow: 0 0 0 .2rem var(--nami-accent-soft);
+}

@@ -3,6 +3,8 @@
 @inject UserApiService UserApi
 @inject AuthState AuthState
 @inject NavigationManager Navigation
+@inject IJSRuntime JS
+@implements IAsyncDisposable
 
 <PageTitle>Pedido #@OrderId</PageTitle>
 
@@ -12,92 +14,194 @@
 }
 else if (_order is null)
 {
-    <p>Cargando...</p>
+    <div class="nami-skel" style="height:300px;"></div>
 }
 else
 {
-    <h3>Pedido #@_order.Id</h3>
+    <section class="nami-fade">
+        <div style="display:flex; align-items:baseline; gap:14px; flex-wrap:wrap; margin-bottom:22px;">
+            <h2 class="nami-heading" style="margin:0; font-size:28px;">Pedido #@_order.Id</h2>
+            <span class="nami-badge" style="background:@OrderStatusStyle.Bg(_order.Status); color:@OrderStatusStyle.Fg(_order.Status); padding:5px 14px; font-size:13px;">@OrderStatusStyle.Label(_order.Status)</span>
+        </div>
 
-    @if (!string.IsNullOrEmpty(_message))
-    {
-        <div class="alert alert-info">@_message</div>
-    }
+        @if (!string.IsNullOrEmpty(_message))
+        {
+            <div class="alert alert-info">@_message</div>
+        }
 
-    <dl class="row">
-        <dt class="col-sm-3">Restaurante</dt>
-        <dd class="col-sm-9">@_order.RestaurantName</dd>
-        <dt class="col-sm-3">Cliente</dt>
-        <dd class="col-sm-9">@_order.ClientName</dd>
-        <dt class="col-sm-3">Repartidor</dt>
-        <dd class="col-sm-9">@(_order.DeliveryName ?? "Sin asignar")</dd>
-        <dt class="col-sm-3">Dirección</dt>
-        <dd class="col-sm-9">@_order.Address</dd>
-        <dt class="col-sm-3">Estado</dt>
-        <dd class="col-sm-9"><span class="badge bg-info text-dark">@_order.Status</span></dd>
-        <dt class="col-sm-3">Fecha del pedido</dt>
-        <dd class="col-sm-9">@_order.OrderDate.ToLocalTime().ToString("g")</dd>
-        <dt class="col-sm-3">Fecha de entrega</dt>
-        <dd class="col-sm-9">@(_order.DeliveryDate?.ToLocalTime().ToString("g") ?? "-")</dd>
-    </dl>
-
-    <table class="table">
-        <thead><tr><th>Producto</th><th>Cantidad</th><th>Precio</th><th>Subtotal</th></tr></thead>
-        <tbody>
-            @foreach (var detail in _order.Details)
-            {
-                <tr>
-                    <td>@detail.ProductName</td>
-                    <td>@detail.Quantity</td>
-                    <td>@detail.UnitPrice.ToString("C")</td>
-                    <td>@detail.Subtotal.ToString("C")</td>
-                </tr>
-            }
-        </tbody>
-    </table>
-    <div class="text-end"><h5>Total: @_order.Total.ToString("C")</h5></div>
-
-    @if (AuthState.Role is "Administrator" or "Delivery")
-    {
-        <hr />
-        <h5>Gestión del pedido</h5>
-        <div class="row">
-            <div class="col-md-4 mb-3">
-                <label class="form-label">Cambiar estado</label>
-                <select class="form-select" @bind="_newStatus">
-                    @foreach (var status in Enum.GetValues<OrderStatus>())
+        @if (_order.Status == OrderStatus.Cancelled)
+        {
+            <div class="nami-panel" style="padding:20px 24px; margin-bottom:22px; border-color:var(--nami-danger);">
+                <strong style="color:var(--nami-danger);">Este pedido fue cancelado.</strong>
+            </div>
+        }
+        else
+        {
+            <div class="nami-panel" style="padding:30px clamp(10px,3vw,30px) 24px; margin-bottom:22px;">
+                <div class="nami-stepper">
+                    @foreach (var step in Steps)
                     {
-                        <option value="@status">@status</option>
+                        <div class="nami-step @StepClass(step.Ordinal)">
+                            <div class="nami-step-dot">@(StepClass(step.Ordinal) == "nami-step-done" ? "✓" : step.Icon)</div>
+                            <div class="nami-step-label">@step.Label</div>
+                        </div>
                     }
-                </select>
-                <button class="btn btn-primary btn-sm mt-2" @onclick="UpdateStatusAsync">Actualizar estado</button>
+                </div>
+            </div>
+        }
+
+        <div class="nami-grid-2">
+            <div class="nami-panel" style="overflow:hidden;">
+                <div id="@_mapElementId" class="nami-map"></div>
+                <div style="padding:18px 22px; display:flex; flex-direction:column; gap:6px;">
+                    <div class="nami-heading" style="font-size:15px;">Entrega en</div>
+                    <div style="color:var(--nami-muted); font-size:14px;">@_order.Address</div>
+                    <div id="@_etaElementId" style="color:var(--nami-accent); font-size:13.5px; font-weight:700; margin-top:4px;"></div>
+                </div>
             </div>
 
-            @if (AuthState.Role == "Administrator")
-            {
-                <div class="col-md-4 mb-3">
-                    <label class="form-label">Asignar repartidor</label>
-                    <select class="form-select" @bind="_selectedDeliveryId">
-                        <option value="0">-- Selecciona --</option>
-                        @foreach (var delivery in _availableDeliveries)
-                        {
-                            <option value="@delivery.Id">@delivery.FirstName @delivery.LastName</option>
-                        }
-                    </select>
-                    <button class="btn btn-primary btn-sm mt-2" @onclick="AssignDeliveryAsync">Asignar</button>
+            <div class="nami-panel" style="padding:24px;">
+                <h3 class="nami-heading" style="margin:0 0 16px; font-size:18px;">Tu pedido · @_order.RestaurantName</h3>
+                <div style="display:flex; flex-direction:column; gap:12px;">
+                    @foreach (var detail in _order.Details)
+                    {
+                        <div>
+                            <div style="display:flex; justify-content:space-between; gap:12px; font-size:14.5px;">
+                                <span><span style="color:var(--nami-accent); font-weight:700;">@(detail.Quantity)×</span> @detail.ProductName</span>
+                                <span style="font-weight:600;">@detail.Subtotal.ToString("C")</span>
+                            </div>
+                            @if (!string.IsNullOrWhiteSpace(detail.Notes))
+                            {
+                                <div style="color:var(--nami-muted); font-size:12px; font-style:italic; margin-top:2px;">"@detail.Notes"</div>
+                            }
+                        </div>
+                    }
                 </div>
-            }
+                <div style="display:flex; justify-content:space-between; border-top:1px solid var(--nami-border); margin-top:16px; padding-top:14px; font-weight:800; font-size:16px;" class="nami-heading">
+                    <span>Total pagado</span><span style="color:var(--nami-accent);">@_order.Total.ToString("C")</span>
+                </div>
+                <p style="margin:16px 0 0; color:var(--nami-muted); font-size:13px;">
+                    Cliente: @_order.ClientName · Repartidor: @(_order.DeliveryName ?? "Sin asignar")
+                </p>
+                <p style="margin:4px 0 0; color:var(--nami-muted); font-size:13px;">
+                    Pedido el @_order.OrderDate.ToLocalTime().ToString("g")
+                    @if (_order.DeliveryDate is not null)
+                    {
+                        <text> · Entregado el @_order.DeliveryDate.Value.ToLocalTime().ToString("g")</text>
+                    }
+                </p>
+                @if (_payment is not null)
+                {
+                    <div style="display:flex; align-items:center; gap:8px; margin-top:12px; padding-top:12px; border-top:1px solid var(--nami-border);">
+                        <span class="nami-badge" style="background:@PaymentStatusBg(_payment.Status); color:@PaymentStatusFg(_payment.Status);">@PaymentStatusLabel(_payment.Status)</span>
+                        <span style="color:var(--nami-muted); font-size:13px;">Pago @PaymentMethodLabel(_payment.Method) · @_payment.Date.ToLocalTime().ToString("g")</span>
+                    </div>
+                }
+            </div>
         </div>
-    }
+
+        @if (AuthState.Role == "Client" && _order.Status == OrderStatus.Delivered)
+        {
+            <div class="nami-panel" style="padding:24px; margin-top:22px;">
+                @if (_order.DeliveryRating is not null)
+                {
+                    <h3 class="nami-heading" style="margin:0 0 10px; font-size:17px;">Tu calificación al repartidor</h3>
+                    <div style="font-size:24px; color:var(--nami-accent); letter-spacing:2px;">
+                        @for (var i = 1; i <= 5; i++)
+                        {
+                            <span>@(i <= _order.DeliveryRating ? "★" : "☆")</span>
+                        }
+                    </div>
+                    @if (!string.IsNullOrWhiteSpace(_order.DeliveryRatingComment))
+                    {
+                        <p style="margin:10px 0 0; color:var(--nami-muted); font-size:14px; font-style:italic;">"@_order.DeliveryRatingComment"</p>
+                    }
+                }
+                else
+                {
+                    <h3 class="nami-heading" style="margin:0 0 14px; font-size:17px;">Califica a tu repartidor</h3>
+                    @if (!string.IsNullOrEmpty(_ratingError))
+                    {
+                        <div class="alert alert-danger">@_ratingError</div>
+                    }
+                    <div style="display:flex; gap:6px; font-size:30px; cursor:pointer; margin-bottom:14px; letter-spacing:2px;">
+                        @for (var i = 1; i <= 5; i++)
+                        {
+                            var star = i;
+                            <span style="color:@(star <= _ratingValue ? "var(--nami-accent)" : "var(--nami-border)");" @onclick="() => _ratingValue = star">@(star <= _ratingValue ? "★" : "☆")</span>
+                        }
+                    </div>
+                    <textarea class="nami-input" rows="2" placeholder="Comentario (opcional)" @bind="_ratingComment"></textarea>
+                    <button class="nami-btn nami-btn-primary nami-btn-sm" style="margin-top:12px;" disabled="@(_ratingValue == 0 || _submittingRating)" @onclick="SubmitRatingAsync">
+                        @(_submittingRating ? "Enviando…" : "Enviar calificación")
+                    </button>
+                }
+            </div>
+        }
+
+        @if (AuthState.Role is "Administrator" or "Delivery")
+        {
+            <div class="nami-panel" style="padding:24px; margin-top:22px;">
+                <h3 class="nami-heading" style="margin:0 0 16px; font-size:17px;">Gestión del pedido</h3>
+                <div class="nami-grid-2">
+                    <div>
+                        <label class="nami-label">Cambiar estado</label>
+                        <select class="nami-select" @bind="_newStatus">
+                            @foreach (var status in Enum.GetValues<OrderStatus>())
+                            {
+                                <option value="@status">@OrderStatusStyle.Label(status)</option>
+                            }
+                        </select>
+                        <button class="nami-btn nami-btn-primary nami-btn-sm" style="margin-top:10px;" @onclick="UpdateStatusAsync">Actualizar estado</button>
+                    </div>
+
+                    @if (AuthState.Role == "Administrator")
+                    {
+                        <div>
+                            <label class="nami-label">Asignar repartidor</label>
+                            <select class="nami-select" @bind="_selectedDeliveryId">
+                                <option value="0">-- Selecciona --</option>
+                                @foreach (var delivery in _availableDeliveries)
+                                {
+                                    <option value="@delivery.Id">@delivery.FirstName @delivery.LastName</option>
+                                }
+                            </select>
+                            <button class="nami-btn nami-btn-primary nami-btn-sm" style="margin-top:10px;" @onclick="AssignDeliveryAsync">Asignar</button>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+    </section>
 }
 
 @code {
     [Parameter] public int OrderId { get; set; }
 
+    private readonly record struct StepInfo(int Ordinal, string Label, string Icon);
+
+    private static readonly List<StepInfo> Steps =
+    [
+        new((int)OrderStatus.Confirmed, "Confirmado", "1"),
+        new((int)OrderStatus.InPreparation, "En preparación", "2"),
+        new((int)OrderStatus.ReadyForPickup, "Listo", "3"),
+        new((int)OrderStatus.PickedUp, "Recogido", "4"),
+        new((int)OrderStatus.Delivered, "Entregado", "5")
+    ];
+
     private OrderDto? _order;
+    private PaymentDto? _payment;
     private List<DeliveryDto> _availableDeliveries = [];
     private OrderStatus _newStatus;
     private int _selectedDeliveryId;
     private string? _message;
+    private int _ratingValue;
+    private string? _ratingComment;
+    private string? _ratingError;
+    private bool _submittingRating;
+    private readonly string _mapElementId = $"nami-map-{Guid.NewGuid():N}";
+    private readonly string _etaElementId = $"nami-eta-{Guid.NewGuid():N}";
+    private OrderStatus? _mapRenderedForStatus;
 
     protected override async Task OnInitializedAsync()
     {
@@ -109,12 +213,74 @@ else
             _availableDeliveries = await UserApi.GetAvailableDeliveries();
     }
 
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (_order is not null && _order.Status != OrderStatus.Cancelled && _mapRenderedForStatus != _order.Status)
+        {
+            _mapRenderedForStatus = _order.Status;
+            try
+            {
+                await JS.InvokeVoidAsync("namiMap.render", _mapElementId, _etaElementId,
+                    _order.RestaurantLatitude, _order.RestaurantLongitude, _order.RestaurantName,
+                    _order.DeliveryLatitude, _order.DeliveryLongitude, "Tu dirección",
+                    _order.Status == OrderStatus.PickedUp);
+            }
+            catch (JSDisconnectedException)
+            {
+                // El circuito se cerró (navegación fuera de la página); no hay nada que renderizar.
+            }
+        }
+    }
+
+    private string StepClass(int stepOrdinal)
+    {
+        if (_order is null) return string.Empty;
+        var current = (int)_order.Status;
+        if (current > stepOrdinal) return "nami-step-done";
+        if (current == stepOrdinal) return "nami-step-current";
+        return string.Empty;
+    }
+
     private async Task LoadAsync()
     {
         _order = await OrderApi.GetById(OrderId);
         if (_order is not null)
             _newStatus = _order.Status;
+
+        _payment = await OrderApi.GetPayment(OrderId);
     }
+
+    private static string PaymentStatusLabel(PaymentStatus status) => status switch
+    {
+        PaymentStatus.Completed => "Pago completado",
+        PaymentStatus.Pending => "Pago pendiente",
+        PaymentStatus.Failed => "Pago fallido",
+        _ => status.ToString()
+    };
+
+    private static string PaymentStatusBg(PaymentStatus status) => status switch
+    {
+        PaymentStatus.Completed => "rgba(74,222,128,.18)",
+        PaymentStatus.Pending => "rgba(250,204,21,.18)",
+        PaymentStatus.Failed => "rgba(248,113,113,.18)",
+        _ => "var(--nami-ph2)"
+    };
+
+    private static string PaymentStatusFg(PaymentStatus status) => status switch
+    {
+        PaymentStatus.Completed => "var(--nami-success)",
+        PaymentStatus.Pending => "#eab308",
+        PaymentStatus.Failed => "var(--nami-danger)",
+        _ => "var(--nami-muted)"
+    };
+
+    private static string PaymentMethodLabel(PaymentMethod method) => method switch
+    {
+        PaymentMethod.Cash => "en efectivo",
+        PaymentMethod.Card => "con tarjeta",
+        PaymentMethod.Transfer => "por transferencia",
+        _ => method.ToString()
+    };
 
     private async Task UpdateStatusAsync()
     {
@@ -146,6 +312,42 @@ else
         catch (ApiException ex)
         {
             _message = ex.Message;
+        }
+    }
+
+    private async Task SubmitRatingAsync()
+    {
+        if (_ratingValue is < 1 or > 5)
+        {
+            _ratingError = "Selecciona de 1 a 5 estrellas.";
+            return;
+        }
+
+        _submittingRating = true;
+        _ratingError = null;
+        try
+        {
+            _order = await OrderApi.RateDelivery(OrderId, new RateDeliveryRequest(_ratingValue, _ratingComment));
+        }
+        catch (ApiException ex)
+        {
+            _ratingError = ex.Message;
+        }
+        finally
+        {
+            _submittingRating = false;
+        }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        try
+        {
+            await JS.InvokeVoidAsync("namiMap.dispose", _mapElementId);
+        }
+        catch
+        {
+            // El circuito puede haberse cerrado ya; no es necesario propagar el error.
         }
     }
 }

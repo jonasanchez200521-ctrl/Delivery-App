@@ -3,6 +3,8 @@
 @inject UserApiService UserApi
 @inject AuthState AuthState
 @inject NavigationManager Navigation
+@inject IJSRuntime JS
+@implements IAsyncDisposable
 
 <PageTitle>Mis entregas</PageTitle>
 
@@ -12,45 +14,221 @@
 }
 else
 {
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h3>Mis entregas asignadas</h3>
-        <div class="form-check form-switch">
-            <input class="form-check-input" type="checkbox" role="switch" checked="@_available" @onchange="ToggleAvailabilityAsync" />
-            <label class="form-check-label">Disponible</label>
+    <section class="nami-fade">
+        <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-bottom:26px;">
+            <h2 class="nami-heading" style="margin:0; font-size:26px;">Mis entregas</h2>
+            <label style="display:flex; align-items:center; gap:8px; cursor:pointer; font-size:14px; font-weight:600; color:var(--nami-muted);">
+                <input type="checkbox" role="switch" checked="@_available" @onchange="ToggleAvailabilityAsync" style="width:36px; height:20px; accent-color:var(--nami-accent);" />
+                Disponible para nuevas entregas
+            </label>
         </div>
-    </div>
 
-    @if (_orders is null)
-    {
-        <p>Cargando...</p>
-    }
-    else if (_orders.Count == 0)
-    {
-        <p class="text-muted">No tienes entregas asignadas por el momento.</p>
-    }
-    else
-    {
-        <table class="table">
-            <thead><tr><th>#</th><th>Restaurante</th><th>Dirección</th><th>Estado</th><th></th></tr></thead>
-            <tbody>
-                @foreach (var order in _orders)
-                {
-                    <tr>
-                        <td>@order.Id</td>
-                        <td>@order.RestaurantName</td>
-                        <td>@order.Address</td>
-                        <td><span class="badge bg-info text-dark">@order.Status</span></td>
-                        <td><a class="btn btn-sm btn-outline-primary" href="/pedido/@order.Id">Gestionar</a></td>
-                    </tr>
-                }
-            </tbody>
-        </table>
-    }
+        @if (!string.IsNullOrEmpty(_message))
+        {
+            <div class="alert alert-info">@_message</div>
+        }
+
+        @if (_orders is null)
+        {
+            <div style="display:flex; flex-direction:column; gap:12px;">
+                <div class="nami-skel" style="height:80px;"></div>
+                <div class="nami-skel" style="height:80px;"></div>
+            </div>
+        }
+        else
+        {
+            <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:16px; margin-bottom:26px;">
+                <div class="nami-card" style="padding:20px 22px;">
+                    <div style="color:var(--nami-muted); font-size:13px; font-weight:600; margin-bottom:6px;">Entregas asignadas</div>
+                    <div class="nami-heading" style="font-size:28px;">@_orders.Count</div>
+                </div>
+                <div class="nami-card" style="padding:20px 22px;">
+                    <div style="color:var(--nami-muted); font-size:13px; font-weight:600; margin-bottom:6px;">En curso</div>
+                    <div class="nami-heading" style="font-size:28px; color:var(--nami-accent);">@_orders.Count(o => o.Status is not (OrderStatus.Delivered or OrderStatus.Cancelled))</div>
+                </div>
+                <div class="nami-card" style="padding:20px 22px;">
+                    <div style="color:var(--nami-muted); font-size:13px; font-weight:600; margin-bottom:6px;">Entregadas hoy</div>
+                    <div class="nami-heading" style="font-size:28px;">@_orders.Count(o => o.DeliveryDate?.ToLocalTime().Date == DateTime.Today)</div>
+                </div>
+                <div class="nami-card" style="padding:20px 22px;">
+                    <div style="color:var(--nami-muted); font-size:13px; font-weight:600; margin-bottom:6px;">Mi calificación</div>
+                    <div class="nami-heading" style="font-size:28px; color:var(--nami-accent);">
+                        @(MyAverageRating is null ? "—" : $"★ {MyAverageRating:0.0}")
+                    </div>
+                </div>
+            </div>
+
+            @if (RatedOrders.Count > 0)
+            {
+                <h3 class="nami-heading" style="margin:0 0 16px; font-size:20px;">Últimas calificaciones recibidas</h3>
+                <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:32px;">
+                    @foreach (var rated in RatedOrders.Take(5))
+                    {
+                        <div class="nami-card" style="padding:14px 18px;">
+                            <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
+                                <span style="color:var(--nami-accent); font-size:15px; letter-spacing:2px;">
+                                    @for (var i = 1; i <= 5; i++)
+                                    {
+                                        <span>@(i <= rated.DeliveryRating ? "★" : "☆")</span>
+                                    }
+                                </span>
+                                <span style="color:var(--nami-muted); font-size:12.5px;">Pedido #@rated.Id</span>
+                            </div>
+                            @if (!string.IsNullOrWhiteSpace(rated.DeliveryRatingComment))
+                            {
+                                <p style="margin:6px 0 0; color:var(--nami-muted); font-size:13px; font-style:italic;">"@rated.DeliveryRatingComment"</p>
+                            }
+                        </div>
+                    }
+                </div>
+            }
+
+            @if (_activeOrder is not null)
+            {
+                <h3 class="nami-heading" style="margin:0 0 16px; font-size:20px;">Entrega activa</h3>
+                <div class="nami-panel" style="padding:26px; margin-bottom:32px;">
+                    <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-bottom:24px;">
+                        <div>
+                            <div class="nami-heading" style="font-size:18px;">Pedido #@_activeOrder.Id · @_activeOrder.RestaurantName</div>
+                            <div style="color:var(--nami-muted); font-size:13.5px; margin-top:3px;">Recoger en el local y entregar al cliente</div>
+                        </div>
+                        <span class="nami-badge" style="background:@OrderStatusStyle.Bg(_activeOrder.Status); color:@OrderStatusStyle.Fg(_activeOrder.Status); padding:6px 14px; font-size:13px;">@OrderStatusStyle.Label(_activeOrder.Status)</span>
+                    </div>
+
+                    <div class="nami-stepper" style="max-width:520px; margin:0 auto 26px;">
+                        @foreach (var step in Steps)
+                        {
+                            <div class="nami-step @StepClass(_activeOrder, step.Ordinal)">
+                                <div class="nami-step-dot" style="width:32px; height:32px; font-size:13px;">@(StepClass(_activeOrder, step.Ordinal) == "nami-step-done" ? "✓" : step.Icon)</div>
+                                <div class="nami-step-label">@step.Label</div>
+                            </div>
+                        }
+                    </div>
+
+                    <div class="nami-grid-2">
+                        <div>
+                            <div id="@_mapElementId" class="nami-map" style="border-radius:14px; overflow:hidden;"></div>
+                            <div id="@_etaElementId" style="color:var(--nami-accent); font-size:13px; font-weight:700; margin-top:8px;"></div>
+                        </div>
+                        <div>
+                            <div class="nami-card" style="padding:18px 20px; margin-bottom:14px;">
+                                <div style="color:var(--nami-muted); font-size:12.5px; font-weight:600; margin-bottom:4px;">Cliente</div>
+                                <div class="nami-heading" style="font-size:16px;">@_activeOrder.ClientName</div>
+                                <div style="color:var(--nami-muted); font-size:13.5px; margin-top:4px;">@_activeOrder.Address</div>
+                            </div>
+                            <button class="nami-btn nami-btn-primary nami-btn-block" style="padding:14px;" disabled="@_advancing" @onclick="AdvanceActiveOrderAsync">
+                                @(_advancing ? "Actualizando…" : NextStepLabel(_activeOrder.Status))
+                            </button>
+                            @if (_activeOrder.Status != OrderStatus.PickedUp)
+                            {
+                                <button class="nami-btn nami-btn-ghost nami-btn-block" style="margin-top:10px; color:var(--nami-danger); border-color:var(--nami-danger);" disabled="@_rejecting" @onclick="RejectActiveOrderAsync">
+                                    @(_rejecting ? "Rechazando…" : "Rechazar entrega")
+                                </button>
+                            }
+                            <a class="nami-btn nami-btn-ghost nami-btn-block" style="margin-top:10px;" href="/pedido/@_activeOrder.Id">Ver detalle y mapa</a>
+                        </div>
+                    </div>
+                </div>
+            }
+
+            <h3 class="nami-heading" style="margin:0 0 16px; font-size:20px;">Órdenes disponibles</h3>
+            @if (_activeOrder is not null)
+            {
+                <div class="alert alert-info" style="margin-bottom:16px;">
+                    Termina tu entrega actual para tomar otra.
+                </div>
+            }
+            @if (_availableOrders is null)
+            {
+                <div class="nami-skel" style="height:80px; margin-bottom:32px;"></div>
+            }
+            else if (_availableOrders.Count == 0)
+            {
+                <div style="text-align:center; padding:40px 20px; background:var(--nami-panel); border:1px dashed var(--nami-border); border-radius:18px; color:var(--nami-muted); font-size:15px; margin-bottom:32px;">
+                    No hay órdenes disponibles por ahora.
+                </div>
+            }
+            else
+            {
+                <div style="display:grid; grid-template-columns:repeat(auto-fill,minmax(290px,1fr)); gap:16px; margin-bottom:32px;">
+                    @foreach (var order in _availableOrders)
+                    {
+                        <div class="nami-card" style="padding:20px; @(_activeOrder is not null ? "opacity:.6;" : "")">
+                            <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:4px;">
+                                <h4 class="nami-heading" style="margin:0; font-size:16px;">@order.RestaurantName</h4>
+                                <span style="background:var(--nami-accent-soft); color:var(--nami-accent); font-size:14px; font-weight:800; padding:4px 12px; border-radius:999px;">@order.Total.ToString("C")</span>
+                            </div>
+                            <div style="color:var(--nami-muted); font-size:13.5px; line-height:1.5; margin:8px 0 16px;">@order.Address</div>
+                            <div style="display:flex; gap:8px;">
+                                <button class="nami-btn nami-btn-primary" style="flex:1;" disabled="@(_activeOrder is not null || _acceptingId == order.Id)" @onclick="() => AcceptOrderAsync(order.Id)">
+                                    @(_acceptingId == order.Id ? "Aceptando…" : "Aceptar pedido")
+                                </button>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+
+            <h3 class="nami-heading" style="margin:0 0 16px; font-size:20px;">Historial</h3>
+            @if (_orders.Count == 0)
+            {
+                <div style="text-align:center; padding:50px 20px; background:var(--nami-panel); border:1px dashed var(--nami-border); border-radius:18px; color:var(--nami-muted); font-size:15px;">
+                    No tienes entregas asignadas por el momento.
+                </div>
+            }
+            else
+            {
+                <div style="display:flex; flex-direction:column; gap:12px;">
+                    @foreach (var order in _orders)
+                    {
+                        <a href="/pedido/@order.Id" class="nami-card nami-card-hover" style="display:flex; align-items:center; gap:16px; padding:16px 18px; text-decoration:none; color:inherit; flex-wrap:wrap;">
+                            <div style="flex:1; min-width:180px;">
+                                <div class="nami-heading" style="font-size:14.5px;">Pedido #@order.Id · @order.RestaurantName</div>
+                                <div style="color:var(--nami-muted); font-size:12.5px; margin-top:2px;">@order.Address</div>
+                            </div>
+                            <span class="nami-badge" style="background:@OrderStatusStyle.Bg(order.Status); color:@OrderStatusStyle.Fg(order.Status);">@OrderStatusStyle.Label(order.Status)</span>
+                        </a>
+                    }
+                </div>
+            }
+        }
+    </section>
 }
 
 @code {
+    private readonly record struct StepInfo(int Ordinal, string Label, string Icon);
+
+    private static readonly List<StepInfo> Steps =
+    [
+        new((int)OrderStatus.Confirmed, "Confirmado", "1"),
+        new((int)OrderStatus.InPreparation, "En preparación", "2"),
+        new((int)OrderStatus.ReadyForPickup, "Listo", "3"),
+        new((int)OrderStatus.PickedUp, "Recogido", "4"),
+        new((int)OrderStatus.Delivered, "Entregado", "5")
+    ];
+
     private List<OrderDto>? _orders;
+    private List<OrderDto>? _availableOrders;
     private bool _available = true;
+    private bool _advancing;
+    private bool _rejecting;
+    private int? _acceptingId;
+    private string? _message;
+    private readonly string _mapElementId = $"nami-map-{Guid.NewGuid():N}";
+    private readonly string _etaElementId = $"nami-eta-{Guid.NewGuid():N}";
+    private OrderStatus? _mapRenderedForStatus;
+
+    private OrderDto? _activeOrder => _orders?
+        .Where(o => o.Status is not (OrderStatus.Delivered or OrderStatus.Cancelled))
+        .OrderBy(o => o.OrderDate)
+        .FirstOrDefault();
+
+    private List<OrderDto> RatedOrders => (_orders ?? [])
+        .Where(o => o.DeliveryRating.HasValue)
+        .OrderByDescending(o => o.DeliveryDate ?? o.OrderDate)
+        .ToList();
+
+    private double? MyAverageRating => RatedOrders.Count == 0 ? null : RatedOrders.Average(o => (double)o.DeliveryRating!.Value);
 
     protected override async Task OnInitializedAsync()
     {
@@ -60,7 +238,134 @@ else
             return;
         }
 
+        await RefreshAllAsync();
+    }
+
+    private async Task RefreshAllAsync()
+    {
         _orders = await OrderApi.GetMyDeliveries();
+        _availableOrders = await OrderApi.GetAvailable();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        var order = _activeOrder;
+        if (order is not null && _mapRenderedForStatus != order.Status)
+        {
+            _mapRenderedForStatus = order.Status;
+            try
+            {
+                await JS.InvokeVoidAsync("namiMap.render", _mapElementId, _etaElementId,
+                    order.RestaurantLatitude, order.RestaurantLongitude, order.RestaurantName,
+                    order.DeliveryLatitude, order.DeliveryLongitude, "Cliente",
+                    order.Status == OrderStatus.PickedUp);
+            }
+            catch (JSDisconnectedException)
+            {
+                // El circuito se cerró (navegación fuera de la página); no hay nada que renderizar.
+            }
+        }
+        else if (order is null && _mapRenderedForStatus is not null)
+        {
+            _mapRenderedForStatus = null;
+            try
+            {
+                await JS.InvokeVoidAsync("namiMap.dispose", _mapElementId);
+            }
+            catch (JSDisconnectedException)
+            {
+                // El circuito se cerró; nada que limpiar.
+            }
+        }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        try
+        {
+            await JS.InvokeVoidAsync("namiMap.dispose", _mapElementId);
+        }
+        catch
+        {
+            // El circuito puede haberse cerrado ya; no es necesario propagar el error.
+        }
+    }
+
+    private static string StepClass(OrderDto order, int stepOrdinal)
+    {
+        var current = (int)order.Status;
+        if (current > stepOrdinal) return "nami-step-done";
+        if (current == stepOrdinal) return "nami-step-current";
+        return string.Empty;
+    }
+
+    private static string NextStepLabel(OrderStatus current) => current switch
+    {
+        OrderStatus.Confirmed => "Marcar en preparación",
+        OrderStatus.InPreparation => "Marcar listo para recoger",
+        OrderStatus.ReadyForPickup => "Marcar como recogido",
+        OrderStatus.PickedUp => "Marcar como entregado",
+        _ => "Sin más avances"
+    };
+
+    private async Task AdvanceActiveOrderAsync()
+    {
+        var order = _activeOrder;
+        if (order is null || order.Status == OrderStatus.Delivered) return;
+
+        var next = (OrderStatus)((int)order.Status + 1);
+
+        _advancing = true;
+        try
+        {
+            await OrderApi.UpdateStatus(order.Id, new UpdateOrderStatusRequest(next));
+            _orders = await OrderApi.GetMyDeliveries();
+        }
+        finally
+        {
+            _advancing = false;
+        }
+    }
+
+    private async Task AcceptOrderAsync(int orderId)
+    {
+        _acceptingId = orderId;
+        _message = null;
+        try
+        {
+            await OrderApi.Accept(orderId);
+            await RefreshAllAsync();
+        }
+        catch (ApiException ex)
+        {
+            _message = ex.Message;
+            _availableOrders = await OrderApi.GetAvailable();
+        }
+        finally
+        {
+            _acceptingId = null;
+        }
+    }
+
+    private async Task RejectActiveOrderAsync()
+    {
+        var order = _activeOrder;
+        if (order is null) return;
+
+        _rejecting = true;
+        try
+        {
+            await OrderApi.Reject(order.Id);
+            await RefreshAllAsync();
+        }
+        catch (ApiException ex)
+        {
+            _message = ex.Message;
+        }
+        finally
+        {
+            _rejecting = false;
+        }
     }
 
     private async Task ToggleAvailabilityAsync(ChangeEventArgs e)

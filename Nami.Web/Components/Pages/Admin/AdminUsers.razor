@@ -1,5 +1,6 @@
 @page "/admin/usuarios"
 @inject UserApiService UserApi
+@inject AuthApiService AuthApi
 @inject AuthState AuthState
 @inject NavigationManager Navigation
 
@@ -13,116 +14,138 @@
 }
 else
 {
-    <h3 class="mb-3">Usuarios</h3>
+    <h3 class="nami-heading" style="margin:0 0 18px; font-size:22px;">Usuarios</h3>
 
     @if (!string.IsNullOrEmpty(_message))
     {
         <div class="alert alert-info">@_message</div>
     }
 
-    <ul class="nav nav-tabs mb-3">
-        <li class="nav-item"><button class="nav-link @(_tab == "clients" ? "active" : "")" @onclick='() => _tab = "clients"'>Clientes</button></li>
-        <li class="nav-item"><button class="nav-link @(_tab == "deliveries" ? "active" : "")" @onclick='() => _tab = "deliveries"'>Repartidores</button></li>
-        <li class="nav-item"><button class="nav-link @(_tab == "admins" ? "active" : "")" @onclick='() => _tab = "admins"'>Administradores</button></li>
-    </ul>
+    <div style="display:flex; gap:8px; margin-bottom:20px;">
+        <button class="nami-chip @(_tab == "clients" ? "nami-chip-active" : "")" @onclick='() => _tab = "clients"'>Clientes</button>
+        <button class="nami-chip @(_tab == "deliveries" ? "nami-chip-active" : "")" @onclick='() => _tab = "deliveries"'>Repartidores</button>
+        <button class="nami-chip @(_tab == "admins" ? "nami-chip-active" : "")" @onclick='() => _tab = "admins"'>Administradores</button>
+    </div>
 
     @if (_tab == "clients")
     {
-        <table class="table">
-            <thead><tr><th>Nombre</th><th>Correo</th><th>Estado</th><th></th></tr></thead>
-            <tbody>
-                @foreach (var client in _clients)
-                {
-                    <tr>
-                        <td>@client.FirstName @client.LastName</td>
-                        <td>@client.Email</td>
-                        <td>@client.Status</td>
-                        <td>
-                            <button class="btn btn-sm btn-outline-secondary" @onclick="() => ToggleStatusAsync(client.Id, client.Status)">
-                                @(client.Status == UserStatus.Active ? "Bloquear" : "Activar")
-                            </button>
-                        </td>
-                    </tr>
-                }
-            </tbody>
-        </table>
+        <div class="nami-panel" style="padding:20px; overflow-x:auto;">
+            <table class="nami-table">
+                <thead><tr><th>Nombre</th><th>Correo</th><th>Estado</th><th></th></tr></thead>
+                <tbody>
+                    @foreach (var client in _clients)
+                    {
+                        <tr>
+                            <td style="font-weight:700;">@client.FirstName @client.LastName</td>
+                            <td style="color:var(--nami-muted);">@client.Email</td>
+                            <td>
+                                <span class="nami-badge" style="background:@(client.Status == UserStatus.Active ? "rgba(74,222,128,.18)" : "rgba(248,113,113,.18)"); color:@(client.Status == UserStatus.Active ? "var(--nami-success)" : "var(--nami-danger)");">@client.Status</span>
+                            </td>
+                            <td style="text-align:right;">
+                                @if (client.Status == UserStatus.Blocked)
+                                {
+                                    <button class="nami-btn nami-btn-ghost nami-btn-sm" style="color:var(--nami-success);" @onclick="() => UnlockAsync(client.Email)">Desbloquear</button>
+                                }
+                                else
+                                {
+                                    <button class="nami-btn nami-btn-ghost nami-btn-sm" @onclick="() => ToggleStatusAsync(client.Id, client.Status)">
+                                        @(client.Status == UserStatus.Active ? "Bloquear" : "Activar")
+                                    </button>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
     }
     else if (_tab == "deliveries")
     {
-        <div class="card mb-3">
-            <div class="card-body">
-                <h6>Nuevo repartidor</h6>
-                <div class="row g-2">
-                    <div class="col-md-2"><input class="form-control" placeholder="Nombres" @bind="_deliveryForm.FirstName" /></div>
-                    <div class="col-md-2"><input class="form-control" placeholder="Apellidos" @bind="_deliveryForm.LastName" /></div>
-                    <div class="col-md-2"><input class="form-control" placeholder="Correo" @bind="_deliveryForm.Email" /></div>
-                    <div class="col-md-2"><input class="form-control" placeholder="Contraseña" @bind="_deliveryForm.Password" /></div>
-                    <div class="col-md-2"><input class="form-control" placeholder="Placa" @bind="_deliveryForm.LicencePlate" /></div>
-                    <div class="col-md-2">
-                        <select class="form-select" @bind="_deliveryForm.VehicleType">
-                            <option value="@VehicleType.Bike">Bicicleta</option>
-                            <option value="@VehicleType.Motorcycle">Moto</option>
-                            <option value="@VehicleType.Car">Auto</option>
-                        </select>
-                    </div>
+        <div class="nami-panel" style="padding:20px; margin-bottom:22px;">
+            <h6 class="nami-heading" style="margin:0 0 12px; font-size:14px;">Nuevo repartidor</h6>
+            <div class="row g-2">
+                <div class="col-md-2"><input class="nami-input" placeholder="Nombres" @bind="_deliveryForm.FirstName" /></div>
+                <div class="col-md-2"><input class="nami-input" placeholder="Apellidos" @bind="_deliveryForm.LastName" /></div>
+                <div class="col-md-2"><input class="nami-input" placeholder="Correo" @bind="_deliveryForm.Email" /></div>
+                <div class="col-md-2"><input class="nami-input" placeholder="Contraseña" @bind="_deliveryForm.Password" /></div>
+                <div class="col-md-2"><input class="nami-input" placeholder="Placa" @bind="_deliveryForm.LicencePlate" /></div>
+                <div class="col-md-2">
+                    <select class="nami-select" @bind="_deliveryForm.VehicleType">
+                        <option value="@VehicleType.Bike">Bicicleta</option>
+                        <option value="@VehicleType.Motorcycle">Moto</option>
+                        <option value="@VehicleType.Car">Auto</option>
+                    </select>
                 </div>
-                <button class="btn btn-primary mt-2" @onclick="CreateDeliveryAsync">Crear repartidor</button>
             </div>
+            <button class="nami-btn nami-btn-primary" style="margin-top:12px;" @onclick="CreateDeliveryAsync">Crear repartidor</button>
         </div>
 
-        <table class="table">
-            <thead><tr><th>Nombre</th><th>Correo</th><th>Vehículo</th><th>Disponible</th><th>Estado</th><th></th></tr></thead>
-            <tbody>
-                @foreach (var delivery in _deliveries)
-                {
-                    <tr>
-                        <td>@delivery.FirstName @delivery.LastName</td>
-                        <td>@delivery.Email</td>
-                        <td>@delivery.VehicleType (@delivery.LicencePlate)</td>
-                        <td>@(delivery.Availability ? "Sí" : "No")</td>
-                        <td>@delivery.Status</td>
-                        <td>
-                            <button class="btn btn-sm btn-outline-secondary" @onclick="() => ToggleStatusAsync(delivery.Id, delivery.Status)">
-                                @(delivery.Status == UserStatus.Active ? "Bloquear" : "Activar")
-                            </button>
-                        </td>
-                    </tr>
-                }
-            </tbody>
-        </table>
+        <div class="nami-panel" style="padding:20px; overflow-x:auto;">
+            <table class="nami-table" style="min-width:700px;">
+                <thead><tr><th>Nombre</th><th>Correo</th><th>Vehículo</th><th>Disponible</th><th>Estado</th><th></th></tr></thead>
+                <tbody>
+                    @foreach (var delivery in _deliveries)
+                    {
+                        <tr>
+                            <td style="font-weight:700;">@delivery.FirstName @delivery.LastName</td>
+                            <td style="color:var(--nami-muted);">@delivery.Email</td>
+                            <td>@delivery.VehicleType (@delivery.LicencePlate)</td>
+                            <td>@(delivery.Availability ? "Sí" : "No")</td>
+                            <td>
+                                <span class="nami-badge" style="background:@(delivery.Status == UserStatus.Active ? "rgba(74,222,128,.18)" : "rgba(248,113,113,.18)"); color:@(delivery.Status == UserStatus.Active ? "var(--nami-success)" : "var(--nami-danger)");">@delivery.Status</span>
+                            </td>
+                            <td style="text-align:right;">
+                                @if (delivery.Status == UserStatus.Blocked)
+                                {
+                                    <button class="nami-btn nami-btn-ghost nami-btn-sm" style="color:var(--nami-success);" @onclick="() => UnlockAsync(delivery.Email)">Desbloquear</button>
+                                }
+                                else
+                                {
+                                    <button class="nami-btn nami-btn-ghost nami-btn-sm" @onclick="() => ToggleStatusAsync(delivery.Id, delivery.Status)">
+                                        @(delivery.Status == UserStatus.Active ? "Bloquear" : "Activar")
+                                    </button>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
     }
     else
     {
-        <div class="card mb-3">
-            <div class="card-body">
-                <h6>Nuevo administrador</h6>
-                <div class="row g-2">
-                    <div class="col-md-2"><input class="form-control" placeholder="Nombres" @bind="_adminForm.FirstName" /></div>
-                    <div class="col-md-2"><input class="form-control" placeholder="Apellidos" @bind="_adminForm.LastName" /></div>
-                    <div class="col-md-2"><input class="form-control" placeholder="Correo" @bind="_adminForm.Email" /></div>
-                    <div class="col-md-2"><input class="form-control" placeholder="Contraseña" @bind="_adminForm.Password" /></div>
-                    <div class="col-md-2"><input class="form-control" placeholder="Sucursal" @bind="_adminForm.Branch" /></div>
-                    <div class="col-md-2"><input class="form-control" placeholder="Rol" @bind="_adminForm.Rol" /></div>
-                </div>
-                <button class="btn btn-primary mt-2" @onclick="CreateAdminAsync">Crear administrador</button>
+        <div class="nami-panel" style="padding:20px; margin-bottom:22px;">
+            <h6 class="nami-heading" style="margin:0 0 12px; font-size:14px;">Nuevo administrador</h6>
+            <div class="row g-2">
+                <div class="col-md-2"><input class="nami-input" placeholder="Nombres" @bind="_adminForm.FirstName" /></div>
+                <div class="col-md-2"><input class="nami-input" placeholder="Apellidos" @bind="_adminForm.LastName" /></div>
+                <div class="col-md-2"><input class="nami-input" placeholder="Correo" @bind="_adminForm.Email" /></div>
+                <div class="col-md-2"><input class="nami-input" placeholder="Contraseña" @bind="_adminForm.Password" /></div>
+                <div class="col-md-2"><input class="nami-input" placeholder="Sucursal" @bind="_adminForm.Branch" /></div>
+                <div class="col-md-2"><input class="nami-input" placeholder="Rol" @bind="_adminForm.Rol" /></div>
             </div>
+            <button class="nami-btn nami-btn-primary" style="margin-top:12px;" @onclick="CreateAdminAsync">Crear administrador</button>
         </div>
 
-        <table class="table">
-            <thead><tr><th>Nombre</th><th>Correo</th><th>Sucursal</th><th>Rol</th><th>Estado</th></tr></thead>
-            <tbody>
-                @foreach (var admin in _admins)
-                {
-                    <tr>
-                        <td>@admin.FirstName @admin.LastName</td>
-                        <td>@admin.Email</td>
-                        <td>@admin.Branch</td>
-                        <td>@admin.Rol</td>
-                        <td>@admin.Status</td>
-                    </tr>
-                }
-            </tbody>
-        </table>
+        <div class="nami-panel" style="padding:20px; overflow-x:auto;">
+            <table class="nami-table">
+                <thead><tr><th>Nombre</th><th>Correo</th><th>Sucursal</th><th>Rol</th><th>Estado</th></tr></thead>
+                <tbody>
+                    @foreach (var admin in _admins)
+                    {
+                        <tr>
+                            <td style="font-weight:700;">@admin.FirstName @admin.LastName</td>
+                            <td style="color:var(--nami-muted);">@admin.Email</td>
+                            <td>@admin.Branch</td>
+                            <td>@admin.Rol</td>
+                            <td>
+                                <span class="nami-badge" style="background:@(admin.Status == UserStatus.Active ? "rgba(74,222,128,.18)" : "rgba(248,113,113,.18)"); color:@(admin.Status == UserStatus.Active ? "var(--nami-success)" : "var(--nami-danger)");">@admin.Status</span>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
     }
 }
 
@@ -159,6 +182,20 @@ else
         var newStatus = current == UserStatus.Active ? UserStatus.Blocked : UserStatus.Active;
         await UserApi.UpdateStatus(userId, new UpdateUserStatusRequest(newStatus));
         await LoadAllAsync();
+    }
+
+    private async Task UnlockAsync(string email)
+    {
+        try
+        {
+            await AuthApi.UnlockAccount(email);
+            _message = $"Cuenta {email} desbloqueada.";
+            await LoadAllAsync();
+        }
+        catch (ApiException ex)
+        {
+            _message = ex.Message;
+        }
     }
 
     private async Task CreateDeliveryAsync()

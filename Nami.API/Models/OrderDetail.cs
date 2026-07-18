@@ -13,5 +13,6 @@ namespace Nami.API.Models
         public int Quantity { get; set; }
         public decimal UnitPrice { get; set; }
         public decimal Subtotal { get; set; }
+        public string? Notes { get; set; }
     }
 }

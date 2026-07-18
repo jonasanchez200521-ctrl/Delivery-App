@@ -10,11 +10,15 @@ namespace Nami.API.Services
     {
         private readonly DeliveryDbContext _context;
         private readonly ITokenService _tokenService;
+        private readonly INotification _notificationService;
 
-        public AuthService(DeliveryDbContext context, ITokenService tokenService)
+        private const int MaxFailedLoginAttempts = 5;
+
+        public AuthService(DeliveryDbContext context, ITokenService tokenService, INotification notificationService)
         {
             _context = context;
             _tokenService = tokenService;
+            _notificationService = notificationService;
         }
 
         public async Task<LoginResponse> Login(LoginRequest request)
@@ -22,11 +26,29 @@ namespace Nami.API.Services
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == request.Email)
                 ?? throw new InvalidOperationException("Credenciales inválidas.");
 
+            if (user.Status == UserStatus.Blocked)
+                throw new InvalidOperationException("Cuenta bloqueada, contacta al administrador.");
+
             if (user.Status != UserStatus.Active)
                 throw new InvalidOperationException("La cuenta no está activa. Contacte al administrador.");
 
             if (!BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
+            {
+                user.FailedLoginAttempts++;
+
+                if (user.FailedLoginAttempts >= MaxFailedLoginAttempts)
+                {
+                    user.Status = UserStatus.Blocked;
+                    await _context.SaveChangesAsync();
+                    throw new InvalidOperationException("Cuenta bloqueada, contacta al administrador.");
+                }
+
+                await _context.SaveChangesAsync();
                 throw new InvalidOperationException("Credenciales inválidas.");
+            }
+
+            user.FailedLoginAttempts = 0;
+            await _context.SaveChangesAsync();
 
             var userType = user switch
             {
@@ -92,7 +114,14 @@ namespace Nami.API.Services
             if (user is null) return false;
 
             user.Status = UserStatus.Active;
+            user.FailedLoginAttempts = 0;
             await _context.SaveChangesAsync();
+
+            await _notificationService.SendNotification(
+                user.Id,
+                "Tu cuenta fue desbloqueada por un administrador. Ya puedes iniciar sesión.",
+                NotificationType.System);
+
             return true;
         }
 

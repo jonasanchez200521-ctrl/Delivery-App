@@ -13,29 +13,31 @@
 }
 else if (_orders is null)
 {
-    <p>Cargando...</p>
+    <div class="nami-skel" style="height:300px;"></div>
 }
 else
 {
-    <h3 class="mb-3">Todos los pedidos</h3>
+    <h3 class="nami-heading" style="margin:0 0 18px; font-size:22px;">Todos los pedidos</h3>
 
-    <table class="table">
-        <thead><tr><th>#</th><th>Cliente</th><th>Restaurante</th><th>Repartidor</th><th>Total</th><th>Estado</th><th></th></tr></thead>
-        <tbody>
-            @foreach (var order in _orders)
-            {
-                <tr>
-                    <td>@order.Id</td>
-                    <td>@order.ClientName</td>
-                    <td>@order.RestaurantName</td>
-                    <td>@(order.DeliveryName ?? "Sin asignar")</td>
-                    <td>@order.Total.ToString("C")</td>
-                    <td><span class="badge bg-info text-dark">@order.Status</span></td>
-                    <td><a class="btn btn-sm btn-outline-primary" href="/pedido/@order.Id">Gestionar</a></td>
-                </tr>
-            }
-        </tbody>
-    </table>
+    <div class="nami-panel" style="padding:20px; overflow-x:auto;">
+        <table class="nami-table" style="min-width:760px;">
+            <thead><tr><th>#</th><th>Cliente</th><th>Restaurante</th><th>Repartidor</th><th style="text-align:right;">Total</th><th>Estado</th><th style="text-align:right;">Acciones</th></tr></thead>
+            <tbody>
+                @foreach (var order in _orders)
+                {
+                    <tr>
+                        <td style="font-weight:700;">@order.Id</td>
+                        <td>@order.ClientName</td>
+                        <td style="color:var(--nami-muted);">@order.RestaurantName</td>
+                        <td style="color:var(--nami-muted);">@(order.DeliveryName ?? "Sin asignar")</td>
+                        <td style="text-align:right; font-weight:700;">@order.Total.ToString("C")</td>
+                        <td><span class="nami-badge" style="background:@OrderStatusStyle.Bg(order.Status); color:@OrderStatusStyle.Fg(order.Status);">@OrderStatusStyle.Label(order.Status)</span></td>
+                        <td style="text-align:right;"><a class="nami-btn nami-btn-ghost nami-btn-sm" href="/pedido/@order.Id">Gestionar</a></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
 }
 
 @code {

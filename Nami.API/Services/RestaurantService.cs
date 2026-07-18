@@ -32,7 +32,10 @@ namespace Nami.API.Services
                 Address = request.Address,
                 Category = request.Category,
                 Status = RestaurantStatus.Active,
-                Rating = 0
+                Rating = 0,
+                ImageUrl = request.ImageUrl,
+                Latitude = request.Latitude,
+                Longitude = request.Longitude
             };
 
             _context.Restaurants.Add(restaurant);
@@ -50,6 +53,9 @@ namespace Nami.API.Services
             restaurant.Category = request.Category;
             restaurant.Status = request.Status;
             restaurant.Rating = request.Rating;
+            restaurant.ImageUrl = request.ImageUrl;
+            restaurant.Latitude = request.Latitude;
+            restaurant.Longitude = request.Longitude;
 
             await _context.SaveChangesAsync();
             return restaurant.ToDto();

@@ -3,44 +3,85 @@
 @inject AuthState AuthState
 @inject NavigationManager Navigation
 
-<PageTitle>Ingresar</PageTitle>
+<PageTitle>Ingresar — Ñami</PageTitle>
 
-<div class="row justify-content-center">
-    <div class="col-md-5">
-        <h3 class="mb-3">Ingresar</h3>
+<section class="nami-fade" style="display:flex; justify-content:center; padding:clamp(10px,4vw,40px) 0;">
+    <div class="nami-panel nami-up" style="width:100%; max-width:420px; padding:32px;">
+        <div class="nami-heading" style="font-size:26px; text-align:center; margin-bottom:6px;">Ñami<span style="color:var(--nami-accent);">.</span></div>
+        <p style="text-align:center; color:var(--nami-muted); font-size:14px; margin:0 0 24px;">Ingresa para seguir tu pedido.</p>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px; background:var(--nami-input); border:1px solid var(--nami-border); border-radius:999px; padding:5px; margin-bottom:24px;">
+            <button class="nami-btn nami-btn-primary" style="padding:9px;">Iniciar sesión</button>
+            <a class="nami-btn" style="padding:9px; color:var(--nami-muted);" href="/registro">Registrarme</a>
+        </div>
 
         @if (!string.IsNullOrEmpty(_error))
         {
             <div class="alert alert-danger">@_error</div>
         }
 
-        <EditForm Model="_model" OnValidSubmit="SubmitAsync">
-            <div class="mb-3">
-                <label class="form-label">Correo</label>
-                <InputText class="form-control" @bind-Value="_model.Email" />
-            </div>
-            <div class="mb-3">
-                <label class="form-label">Contraseña</label>
-                <InputText type="password" class="form-control" @bind-Value="_model.Password" />
-            </div>
-            <button class="btn btn-primary w-100" type="submit" disabled="@_loading">
-                @(_loading ? "Ingresando..." : "Ingresar")
-            </button>
-        </EditForm>
+        @if (!_showRecover)
+        {
+            <EditForm Model="_model" OnValidSubmit="SubmitAsync">
+                <div style="display:flex; flex-direction:column; gap:14px;">
+                    <div>
+                        <label class="nami-label">Correo electrónico</label>
+                        <InputText class="nami-input" placeholder="tucorreo@ejemplo.com" @bind-Value="_model.Email" />
+                    </div>
+                    <div>
+                        <label class="nami-label">Contraseña</label>
+                        <InputText type="password" class="nami-input" placeholder="••••••••" @bind-Value="_model.Password" />
+                    </div>
+                    <button class="nami-btn nami-btn-primary nami-btn-block" style="padding:14px; margin-top:4px;" type="submit" disabled="@_loading">
+                        @(_loading ? "Ingresando…" : "Ingresar")
+                    </button>
+                </div>
+            </EditForm>
 
-        <hr />
-        <p class="text-muted small">
+            <button class="nami-btn" style="width:100%; margin-top:14px; padding:0; color:var(--nami-muted); font-size:13px;" @onclick="OpenRecover">
+                ¿Olvidaste tu contraseña?
+            </button>
+        }
+        else
+        {
+            <p style="color:var(--nami-muted); font-size:13.5px; margin:0 0 16px;">
+                Escribe tu correo (de cliente, repartidor o administrador) y te enviaremos instrucciones de recuperación como notificación en la app.
+            </p>
+
+            @if (!string.IsNullOrEmpty(_recoverMessage))
+            {
+                <div class="alert alert-info">@_recoverMessage</div>
+            }
+
+            <div style="display:flex; flex-direction:column; gap:14px;">
+                <div>
+                    <label class="nami-label">Correo electrónico</label>
+                    <InputText class="nami-input" placeholder="tucorreo@ejemplo.com" @bind-Value="_recoverEmail" />
+                </div>
+                <button class="nami-btn nami-btn-primary nami-btn-block" style="padding:14px;" disabled="@_recovering" @onclick="SubmitRecoverAsync">
+                    @(_recovering ? "Enviando…" : "Enviar instrucciones")
+                </button>
+                <button class="nami-btn" style="padding:0; color:var(--nami-muted); font-size:13px;" @onclick="CloseRecover">
+                    Volver a iniciar sesión
+                </button>
+            </div>
+        }
+
+        <p style="text-align:center; color:var(--nami-muted); font-size:12.5px; margin:18px 0 0;">
             Cuentas de prueba: admin@delivery.com / Admin123!, cliente1@delivery.com / Cliente123!,
             courier1@delivery.com / Courier123!
         </p>
-        <p>¿No tienes cuenta? <a href="/registro">Regístrate aquí</a></p>
     </div>
-</div>
+</section>
 
 @code {
     private readonly LoginFormModel _model = new();
     private string? _error;
     private bool _loading;
+    private bool _showRecover;
+    private string _recoverEmail = string.Empty;
+    private string? _recoverMessage;
+    private bool _recovering;
 
     private async Task SubmitAsync()
     {
@@ -52,7 +93,7 @@
             if (response is not null)
             {
                 AuthState.SetSession(response);
-                Navigation.NavigateTo("/");
+                Navigation.NavigateTo(HomeRouteFor(AuthState.Role));
             }
         }
         catch (ApiException ex)
@@ -64,6 +105,51 @@
             _loading = false;
         }
     }
+
+    private void OpenRecover()
+    {
+        _showRecover = true;
+        _recoverEmail = _model.Email;
+        _recoverMessage = null;
+        _error = null;
+    }
+
+    private void CloseRecover()
+    {
+        _showRecover = false;
+        _recoverMessage = null;
+    }
+
+    private async Task SubmitRecoverAsync()
+    {
+        if (string.IsNullOrWhiteSpace(_recoverEmail))
+        {
+            _recoverMessage = "Ingresa tu correo electrónico.";
+            return;
+        }
+
+        _recovering = true;
+        try
+        {
+            await AuthApi.RecoverPassword(_recoverEmail);
+            _recoverMessage = "Si el correo existe en Ñami, dejamos instrucciones de recuperación en sus notificaciones dentro de la app.";
+        }
+        catch (ApiException)
+        {
+            _recoverMessage = "Si el correo existe en Ñami, dejamos instrucciones de recuperación en sus notificaciones dentro de la app.";
+        }
+        finally
+        {
+            _recovering = false;
+        }
+    }
+
+    private static string HomeRouteFor(string role) => role switch
+    {
+        "Administrator" => "/admin",
+        "Delivery" => "/repartidor",
+        _ => "/"
+    };
 
     private class LoginFormModel
     {

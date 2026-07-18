@@ -55,6 +55,10 @@ namespace Nami.API.Migrations
                     b.Property<int>("CartId")
                         .HasColumnType("integer");
 
+                    b.Property<string>("Notes")
+                        .HasMaxLength(250)
+                        .HasColumnType("character varying(250)");
+
                     b.Property<int>("ProductId")
                         .HasColumnType("integer");
 
@@ -111,6 +115,18 @@ namespace Nami.API.Migrations
                             Id = 3,
                             Description = "Postres y dulces",
                             Name = "Postres"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Description = "Hamburguesas, papas y combos",
+                            Name = "Comida rápida"
+                        },
+                        new
+                        {
+                            Id = 5,
+                            Description = "Ceviches y platos de mar",
+                            Name = "Mariscos"
                         });
                 });
 
@@ -166,6 +182,18 @@ namespace Nami.API.Migrations
                     b.Property<int?>("DeliveryId")
                         .HasColumnType("integer");
 
+                    b.Property<double>("DeliveryLatitude")
+                        .HasColumnType("double precision");
+
+                    b.Property<double>("DeliveryLongitude")
+                        .HasColumnType("double precision");
+
+                    b.Property<int?>("DeliveryRating")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("DeliveryRatingComment")
+                        .HasColumnType("text");
+
                     b.Property<DateTime>("OrderDate")
                         .HasColumnType("timestamp with time zone");
 
@@ -196,6 +224,10 @@ namespace Nami.API.Migrations
                         .HasColumnType("integer");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(250)
+                        .HasColumnType("character varying(250)");
 
                     b.Property<int>("OrderId")
                         .HasColumnType("integer");
@@ -267,6 +299,9 @@ namespace Nami.API.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<string>("ImageUrl")
+                        .HasColumnType("text");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text");
@@ -294,6 +329,7 @@ namespace Nami.API.Migrations
                             Id = 1,
                             CategoryId = 1,
                             Description = "Carne, huevo, plátano y arroz",
+                            ImageUrl = "https://images.unsplash.com/photo-1600891964092-4316c288032e?w=500&auto=format&fit=crop&q=60",
                             Name = "Churrasco Mixto",
                             Price = 8.50m,
                             RestaurantId = 1,
@@ -304,6 +340,7 @@ namespace Nami.API.Migrations
                             Id = 2,
                             CategoryId = 2,
                             Description = "Jugo de fruta natural 500ml",
+                            ImageUrl = "https://images.unsplash.com/photo-1600271886742-f049cd451bba?w=500&auto=format&fit=crop&q=60",
                             Name = "Jugo Natural",
                             Price = 2.00m,
                             RestaurantId = 1,
@@ -314,6 +351,7 @@ namespace Nami.API.Migrations
                             Id = 3,
                             CategoryId = 1,
                             Description = "Pizza clásica de mozzarella y albahaca",
+                            ImageUrl = "https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=500&auto=format&fit=crop&q=60",
                             Name = "Pizza Margarita",
                             Price = 9.00m,
                             RestaurantId = 2,
@@ -324,6 +362,7 @@ namespace Nami.API.Migrations
                             Id = 4,
                             CategoryId = 2,
                             Description = "Bebida gaseosa",
+                            ImageUrl = "https://images.unsplash.com/photo-1554866585-cd94860890b7?w=500&auto=format&fit=crop&q=60",
                             Name = "Gaseosa 500ml",
                             Price = 1.50m,
                             RestaurantId = 2,
@@ -334,6 +373,7 @@ namespace Nami.API.Migrations
                             Id = 5,
                             CategoryId = 1,
                             Description = "8 piezas de roll california",
+                            ImageUrl = "https://images.unsplash.com/photo-1553621042-f6e147245754?w=500&auto=format&fit=crop&q=60",
                             Name = "Sushi Roll California",
                             Price = 7.50m,
                             RestaurantId = 3,
@@ -344,10 +384,154 @@ namespace Nami.API.Migrations
                             Id = 6,
                             CategoryId = 3,
                             Description = "Porción de cheesecake",
+                            ImageUrl = "https://images.unsplash.com/photo-1533134242443-d4fd215305ad?w=500&auto=format&fit=crop&q=60",
                             Name = "Cheesecake",
                             Price = 4.00m,
                             RestaurantId = 3,
                             Stock = 20
+                        },
+                        new
+                        {
+                            Id = 7,
+                            CategoryId = 4,
+                            Description = "Carne, queso, lechuga y tomate",
+                            ImageUrl = "https://images.unsplash.com/photo-1550547660-d9450f859349?w=500&auto=format&fit=crop&q=60",
+                            Name = "Hamburguesa Clásica",
+                            Price = 6.50m,
+                            RestaurantId = 4,
+                            Stock = 40
+                        },
+                        new
+                        {
+                            Id = 8,
+                            CategoryId = 4,
+                            Description = "Doble carne, tocino y salsa BBQ",
+                            ImageUrl = "https://images.unsplash.com/photo-1571091718767-18b5b1457add?w=500&auto=format&fit=crop&q=60",
+                            Name = "Hamburguesa BBQ",
+                            Price = 7.50m,
+                            RestaurantId = 4,
+                            Stock = 30
+                        },
+                        new
+                        {
+                            Id = 9,
+                            CategoryId = 4,
+                            Description = "Papas fritas con queso fundido",
+                            ImageUrl = "https://images.unsplash.com/photo-1512058564366-18510be2db19?w=500&auto=format&fit=crop&q=60",
+                            Name = "Papas con queso",
+                            Price = 3.50m,
+                            RestaurantId = 4,
+                            Stock = 50
+                        },
+                        new
+                        {
+                            Id = 10,
+                            CategoryId = 2,
+                            Description = "Malteada cremosa de chocolate",
+                            ImageUrl = "https://images.unsplash.com/photo-1541167760496-1628856ab772?w=500&auto=format&fit=crop&q=60",
+                            Name = "Malteada de chocolate",
+                            Price = 3.00m,
+                            RestaurantId = 4,
+                            Stock = 40
+                        },
+                        new
+                        {
+                            Id = 11,
+                            CategoryId = 2,
+                            Description = "Café negro filtrado",
+                            ImageUrl = "https://images.unsplash.com/photo-1481931098730-318b6f776db0?w=500&auto=format&fit=crop&q=60",
+                            Name = "Café Americano",
+                            Price = 1.75m,
+                            RestaurantId = 5,
+                            Stock = 100
+                        },
+                        new
+                        {
+                            Id = 12,
+                            CategoryId = 2,
+                            Description = "Espresso con leche vaporizada",
+                            ImageUrl = "https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=500&auto=format&fit=crop&q=60",
+                            Name = "Capuccino",
+                            Price = 2.25m,
+                            RestaurantId = 5,
+                            Stock = 80
+                        },
+                        new
+                        {
+                            Id = 13,
+                            CategoryId = 3,
+                            Description = "Porción de torta húmeda de chocolate",
+                            ImageUrl = "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=500&auto=format&fit=crop&q=60",
+                            Name = "Torta de chocolate",
+                            Price = 3.75m,
+                            RestaurantId = 5,
+                            Stock = 25
+                        },
+                        new
+                        {
+                            Id = 14,
+                            CategoryId = 3,
+                            Description = "Croissant de mantequilla horneado",
+                            ImageUrl = "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=500&auto=format&fit=crop&q=60",
+                            Name = "Croissant",
+                            Price = 2.00m,
+                            RestaurantId = 5,
+                            Stock = 35
+                        },
+                        new
+                        {
+                            Id = 15,
+                            CategoryId = 2,
+                            Description = "Jugo de naranja natural 400ml",
+                            ImageUrl = "https://images.unsplash.com/photo-1560781290-7dc94c0f8f4f?w=500&auto=format&fit=crop&q=60",
+                            Name = "Jugo de naranja",
+                            Price = 2.00m,
+                            RestaurantId = 5,
+                            Stock = 50
+                        },
+                        new
+                        {
+                            Id = 16,
+                            CategoryId = 5,
+                            Description = "Ceviche fresco de camarón con limón",
+                            ImageUrl = "https://images.unsplash.com/photo-1554998171-89445e31c52b?w=500&auto=format&fit=crop&q=60",
+                            Name = "Ceviche de camarón",
+                            Price = 9.50m,
+                            RestaurantId = 6,
+                            Stock = 25
+                        },
+                        new
+                        {
+                            Id = 17,
+                            CategoryId = 5,
+                            Description = "Arroz con mariscos mixtos",
+                            ImageUrl = "https://images.unsplash.com/photo-1548369937-47519962c11a?w=500&auto=format&fit=crop&q=60",
+                            Name = "Arroz marinero",
+                            Price = 8.75m,
+                            RestaurantId = 6,
+                            Stock = 20
+                        },
+                        new
+                        {
+                            Id = 18,
+                            CategoryId = 5,
+                            Description = "Sopa de pescado con yuca y cebolla curtida",
+                            ImageUrl = "https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?w=500&auto=format&fit=crop&q=60",
+                            Name = "Encebollado",
+                            Price = 6.00m,
+                            RestaurantId = 6,
+                            Stock = 30
+                        },
+                        new
+                        {
+                            Id = 19,
+                            CategoryId = 2,
+                            Description = "Limonada natural bien helada",
+                            ImageUrl = "https://images.unsplash.com/photo-1516684732162-798a0062be99?w=500&auto=format&fit=crop&q=60",
+                            Name = "Limonada",
+                            Price = 1.75m,
+                            RestaurantId = 6,
+                            Stock = 60
                         });
                 });
 
@@ -399,6 +583,15 @@ namespace Nami.API.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<string>("ImageUrl")
+                        .HasColumnType("text");
+
+                    b.Property<double>("Latitude")
+                        .HasColumnType("double precision");
+
+                    b.Property<double>("Longitude")
+                        .HasColumnType("double precision");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text");
@@ -419,6 +612,9 @@ namespace Nami.API.Migrations
                             Id = 1,
                             Address = "Calle 10 y 5",
                             Category = "Comida típica",
+                            ImageUrl = "https://images.unsplash.com/photo-1544025162-d76694265947?w=800&auto=format&fit=crop&q=60",
+                            Latitude = -0.1953,
+                            Longitude = -78.485399999999998,
                             Name = "La Parrilla Criolla",
                             Rating = 4.5999999999999996,
                             Status = 0
@@ -428,6 +624,9 @@ namespace Nami.API.Migrations
                             Id = 2,
                             Address = "Av. Amazonas 234",
                             Category = "Pizzería",
+                            ImageUrl = "https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=800&auto=format&fit=crop&q=60",
+                            Latitude = -0.2082,
+                            Longitude = -78.4923,
                             Name = "Pizza Nostra",
                             Rating = 4.2999999999999998,
                             Status = 0
@@ -437,8 +636,47 @@ namespace Nami.API.Migrations
                             Id = 3,
                             Address = "Av. 6 de Diciembre 500",
                             Category = "Comida japonesa",
+                            ImageUrl = "https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?w=800&auto=format&fit=crop&q=60",
+                            Latitude = -0.19980000000000001,
+                            Longitude = -78.432699999999997,
                             Name = "Sushi Zen",
                             Rating = 4.7000000000000002,
+                            Status = 0
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Address = "Av. Amazonas y Naciones Unidas",
+                            Category = "Comida rápida",
+                            ImageUrl = "https://images.unsplash.com/photo-1571997478779-2adcbbe9ab2f?w=800&auto=format&fit=crop&q=60",
+                            Latitude = -0.17849999999999999,
+                            Longitude = -78.484999999999999,
+                            Name = "Hamburguesas El Fogón",
+                            Rating = 4.4000000000000004,
+                            Status = 0
+                        },
+                        new
+                        {
+                            Id = 5,
+                            Address = "García Moreno N2-36, Centro Histórico",
+                            Category = "Cafetería",
+                            ImageUrl = "https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=800&auto=format&fit=crop&q=60",
+                            Latitude = -0.22009999999999999,
+                            Longitude = -78.5124,
+                            Name = "Café del Centro",
+                            Rating = 4.5999999999999996,
+                            Status = 0
+                        },
+                        new
+                        {
+                            Id = 6,
+                            Address = "Av. González Suárez N27-142",
+                            Category = "Mariscos",
+                            ImageUrl = "https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?w=800&auto=format&fit=crop&q=60",
+                            Latitude = -0.1963,
+                            Longitude = -78.479500000000002,
+                            Name = "Mariscos La Caleta",
+                            Rating = 4.5,
                             Status = 0
                         });
                 });
@@ -462,6 +700,9 @@ namespace Nami.API.Migrations
                         .IsRequired()
                         .HasMaxLength(150)
                         .HasColumnType("character varying(150)");
+
+                    b.Property<int>("FailedLoginAttempts")
+                        .HasColumnType("integer");
 
                     b.Property<string>("FirstName")
                         .IsRequired()
@@ -528,6 +769,7 @@ namespace Nami.API.Migrations
                             Address = "Av. Principal 100",
                             DateBirth = new DateTime(1990, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             Email = "admin@delivery.com",
+                            FailedLoginAttempts = 0,
                             FirstName = "Ana",
                             Gender = 1,
                             LastName = "Torres",
@@ -556,6 +798,7 @@ namespace Nami.API.Migrations
                             Address = "Calle Los Álamos 45",
                             DateBirth = new DateTime(1995, 5, 10, 0, 0, 0, 0, DateTimeKind.Utc),
                             Email = "cliente1@delivery.com",
+                            FailedLoginAttempts = 0,
                             FirstName = "Carlos",
                             Gender = 0,
                             LastName = "Pérez",
@@ -570,6 +813,7 @@ namespace Nami.API.Migrations
                             Address = "Av. Amazonas 210",
                             DateBirth = new DateTime(1998, 8, 20, 0, 0, 0, 0, DateTimeKind.Utc),
                             Email = "cliente2@delivery.com",
+                            FailedLoginAttempts = 0,
                             FirstName = "María",
                             Gender = 1,
                             LastName = "López",
@@ -606,6 +850,7 @@ namespace Nami.API.Migrations
                             Address = "Sector La Floresta",
                             DateBirth = new DateTime(1993, 3, 15, 0, 0, 0, 0, DateTimeKind.Utc),
                             Email = "courier1@delivery.com",
+                            FailedLoginAttempts = 0,
                             FirstName = "Jorge",
                             Gender = 0,
                             LastName = "Ramírez",
@@ -623,6 +868,7 @@ namespace Nami.API.Migrations
                             Address = "Sector El Bosque",
                             DateBirth = new DateTime(1996, 11, 2, 0, 0, 0, 0, DateTimeKind.Utc),
                             Email = "courier2@delivery.com",
+                            FailedLoginAttempts = 0,
                             FirstName = "Lucía",
                             Gender = 1,
                             LastName = "Fernández",
@@ -633,6 +879,24 @@ namespace Nami.API.Migrations
                             LicencePlate = "PBX-5678",
                             Rating = 4.7999999999999998,
                             VehicleType = 0
+                        },
+                        new
+                        {
+                            Id = 9,
+                            Address = "Sector Carcelén",
+                            DateBirth = new DateTime(1994, 7, 22, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Email = "courier3@delivery.com",
+                            FailedLoginAttempts = 0,
+                            FirstName = "Diego",
+                            Gender = 0,
+                            LastName = "Salazar",
+                            PasswordHash = "$2a$11$8xLd3G.dMRqKGFsYHyaVp.HyA7sbThqUKlyV2aMTkGtKrP6hp1dGa",
+                            Phone = "0977777773",
+                            Status = 0,
+                            Availability = true,
+                            LicencePlate = "PBX-9012",
+                            Rating = 4.2000000000000002,
+                            VehicleType = 2
                         });
                 });
 

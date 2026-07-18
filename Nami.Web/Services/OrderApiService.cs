@@ -18,6 +18,13 @@ namespace Nami.Web.Services
         public async Task<List<OrderDto>> GetMyDeliveries() =>
             await _api.GetAsync<List<OrderDto>>("api/orders/delivery/mine") ?? [];
 
+        public async Task<List<OrderDto>> GetAvailable() =>
+            await _api.GetAsync<List<OrderDto>>("api/orders/available") ?? [];
+
+        public Task<OrderDto?> Accept(int id) => _api.PostAsync<OrderDto>($"api/orders/{id}/accept");
+
+        public Task<OrderDto?> Reject(int id) => _api.PostAsync<OrderDto>($"api/orders/{id}/reject");
+
         public async Task<List<OrderDto>> GetAll() => await _api.GetAsync<List<OrderDto>>("api/orders") ?? [];
 
         public Task<OrderDto?> GetById(int id) => _api.GetAsync<OrderDto>($"api/orders/{id}");
@@ -29,5 +36,8 @@ namespace Nami.Web.Services
             _api.PatchAsync<OrderDto>($"api/orders/{id}/assign-delivery", request);
 
         public Task<PaymentDto?> GetPayment(int orderId) => _api.GetAsync<PaymentDto>($"api/payments/order/{orderId}");
+
+        public Task<OrderDto?> RateDelivery(int orderId, RateDeliveryRequest request) =>
+            _api.PostAsync<OrderDto>($"api/orders/{orderId}/rate-delivery", request);
     }
 }

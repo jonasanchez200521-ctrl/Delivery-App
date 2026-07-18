@@ -88,6 +88,8 @@ namespace Nami.API.Services
             var user = await _context.Users.FindAsync(userId)
                 ?? throw new InvalidOperationException("Usuario no encontrado.");
             user.Status = status;
+            if (status == UserStatus.Active)
+                user.FailedLoginAttempts = 0;
             await _context.SaveChangesAsync();
         }
 

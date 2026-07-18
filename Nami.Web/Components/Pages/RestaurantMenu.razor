@@ -2,44 +2,125 @@
 @inject CatalogApiService CatalogApi
 @inject CartApiService CartApi
 @inject AuthState AuthState
+@inject CartState CartState
 @inject NavigationManager Navigation
 
-<PageTitle>Menú</PageTitle>
+<PageTitle>@(_restaurant?.Name ?? "Menú")</PageTitle>
 
 @if (_restaurant is null)
 {
-    <p>Cargando...</p>
+    <div class="nami-panel" style="overflow:hidden; margin-bottom:26px;">
+        <div class="nami-skel" style="height:170px; border-radius:0;"></div>
+    </div>
 }
 else
 {
-    <h3>@_restaurant.Name</h3>
-    <p class="text-muted">@_restaurant.Category — @_restaurant.Address</p>
+    <section class="nami-fade">
+        <button class="nami-btn" style="color:var(--nami-muted); padding:0; margin-bottom:18px;" @onclick="GoHome">← Volver</button>
 
-    @if (!string.IsNullOrEmpty(_message))
-    {
-        <div class="alert alert-info">@_message</div>
-    }
+        <div class="nami-panel" style="overflow:hidden; margin-bottom:26px;">
+            <div class="nami-photo" style="height:170px; @(string.IsNullOrEmpty(_restaurant.ImageUrl) ? "" : $"background-image:url('{_restaurant.ImageUrl}');")">
+                @if (string.IsNullOrEmpty(_restaurant.ImageUrl))
+                {
+                    <span>banner · @_restaurant.Name</span>
+                }
+            </div>
+            <div style="padding:22px 26px; display:flex; align-items:center; gap:14px; flex-wrap:wrap;">
+                <h2 class="nami-heading" style="margin:0; font-size:26px;">@_restaurant.Name</h2>
+                <span class="nami-rating">★ @_restaurant.Rating.ToString("0.0")</span>
+                <span class="nami-pill-tag">@_restaurant.Category</span>
+                <span class="nami-pill-tag">@_restaurant.Address</span>
+            </div>
+        </div>
 
-    <div class="row g-3">
-        @foreach (var product in _products)
+        @if (!string.IsNullOrEmpty(_message))
         {
-            <div class="col-md-4">
-                <div class="card h-100">
-                    <div class="card-body">
-                        <h5 class="card-title">@product.Name</h5>
-                        <p class="card-text small">@product.Description</p>
-                        <p class="card-text"><strong>@product.Price.ToString("C")</strong> · @product.CategoryName</p>
+            <div class="alert alert-info">@_message</div>
+        }
 
-                        @if (AuthState.Role == "Client")
-                        {
-                            <button class="btn btn-outline-primary btn-sm" @onclick="() => AddToCartAsync(product.Id)">
-                                Agregar al carrito
-                            </button>
-                        }
+        @if (_products.Count == 0)
+        {
+            <p class="text-muted">Este restaurante todavía no tiene productos.</p>
+        }
+        else
+        {
+            <div style="display:grid; grid-template-columns:repeat(auto-fill,minmax(320px,1fr)); gap:16px;">
+                @foreach (var product in _products)
+                {
+                    <div class="nami-card nami-card-hover" style="display:flex; gap:14px; padding:14px; align-items:center;" @onclick="() => OpenModal(product)">
+                        <div class="nami-photo" style="width:84px; height:84px; flex-shrink:0; border-radius:12px; @(string.IsNullOrEmpty(product.ImageUrl) ? "" : $"background-image:url('{product.ImageUrl}');")">
+                            @if (string.IsNullOrEmpty(product.ImageUrl))
+                            {
+                                <span style="font-size:10px;">plato</span>
+                            }
+                        </div>
+                        <div style="flex:1; min-width:0;">
+                            <h4 class="nami-heading" style="margin:0 0 4px; font-size:15.5px;">@product.Name</h4>
+                            <p style="margin:0 0 8px; color:var(--nami-muted); font-size:13px; line-height:1.4;">@product.Description</p>
+                            <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
+                                <span style="font-weight:700; font-size:15px;">@product.Price.ToString("C")</span>
+                                <button class="nami-btn nami-btn-primary nami-btn-sm" @onclick="() => OpenModal(product)" @onclick:stopPropagation="true">Agregar +</button>
+                            </div>
+                        </div>
                     </div>
-                </div>
+                }
             </div>
         }
+    </section>
+}
+
+@if (_modalProduct is not null)
+{
+    <div class="nami-modal-backdrop" @onclick="CloseModal">
+        <div class="nami-modal" @onclick:stopPropagation="true">
+            <div class="nami-photo" style="position:relative; height:180px; @(string.IsNullOrEmpty(_modalProduct.ImageUrl) ? "" : $"background-image:url('{_modalProduct.ImageUrl}');")">
+                @if (string.IsNullOrEmpty(_modalProduct.ImageUrl))
+                {
+                    <span>foto · @_modalProduct.Name</span>
+                }
+                <button class="nami-icon-btn" style="position:absolute; top:12px; right:12px;" @onclick="CloseModal">×</button>
+            </div>
+            <div style="padding:22px 24px 24px;">
+                <div style="display:flex; align-items:baseline; justify-content:space-between; gap:12px;">
+                    <h3 class="nami-heading" style="margin:0; font-size:20px;">@_modalProduct.Name</h3>
+                    <span style="font-weight:800; font-size:17px; color:var(--nami-accent);">@_modalProduct.Price.ToString("C")</span>
+                </div>
+                <p style="margin:8px 0 18px; color:var(--nami-muted); font-size:14px; line-height:1.5;">@_modalProduct.Description</p>
+
+                <div style="display:flex; align-items:center; justify-content:center; gap:20px; margin-bottom:18px;">
+                    <button class="nami-icon-btn" style="width:48px; height:48px; font-size:22px;" @onclick="() => ChangeQty(-1)">−</button>
+                    <span class="nami-heading" style="font-size:22px; min-width:34px; text-align:center;">@_modalQty</span>
+                    <button class="nami-btn nami-btn-primary" style="width:48px; height:48px; border-radius:50%; padding:0; font-size:22px;" @onclick="() => ChangeQty(1)">+</button>
+                </div>
+
+                <label class="nami-label">Notas para el restaurante (opcional)</label>
+                <textarea class="nami-textarea" rows="3" maxlength="250" placeholder="Ej. sin cebolla, salsa aparte…"
+                          value="@_modalNotes" @oninput="e => _modalNotes = e.Value?.ToString() ?? string.Empty"></textarea>
+                <div style="text-align:right; font-size:11.5px; color:var(--nami-muted); margin:4px 0 14px;">@_modalNotes.Length/250</div>
+
+                <button class="nami-btn nami-btn-primary nami-btn-block" style="padding:15px;" disabled="@_adding" @onclick="AddToCartAsync">
+                    @(_adding ? "Agregando…" : $"Agregar a mi pedido · {(_modalProduct.Price * _modalQty).ToString("C")}")
+                </button>
+            </div>
+        </div>
+    </div>
+}
+
+@if (_showAuthPrompt)
+{
+    <div class="nami-modal-backdrop" style="z-index:1060;" @onclick="() => _showAuthPrompt = false">
+        <div class="nami-modal nami-up" style="max-width:380px; padding:32px; text-align:center;" @onclick:stopPropagation="true">
+            <div class="nami-heading" style="font-size:24px; margin-bottom:14px;">Ñami<span style="color:var(--nami-accent);">.</span></div>
+            <h3 class="nami-heading" style="margin:0 0 8px; font-size:19px;">Inicia sesión para pedir</h3>
+            <p style="margin:0 0 22px; color:var(--nami-muted); font-size:14px; line-height:1.5;">
+                Puedes explorar libremente, pero para agregar productos a tu pedido necesitas una cuenta.
+            </p>
+            <div style="display:flex; flex-direction:column; gap:10px;">
+                <a class="nami-btn nami-btn-primary" href="/login">Iniciar sesión</a>
+                <a class="nami-btn nami-btn-outline" href="/registro">Registrarme</a>
+                <button class="nami-btn" style="color:var(--nami-muted);" @onclick="() => _showAuthPrompt = false">Seguir explorando</button>
+            </div>
+        </div>
     </div>
 }
 
@@ -50,28 +131,58 @@ else
     private List<ProductDto> _products = [];
     private string? _message;
 
+    private ProductDto? _modalProduct;
+    private int _modalQty = 1;
+    private string _modalNotes = string.Empty;
+    private bool _adding;
+    private bool _showAuthPrompt;
+
     protected override async Task OnInitializedAsync()
     {
         _restaurant = await CatalogApi.GetRestaurant(RestaurantId);
         _products = await CatalogApi.GetProducts(RestaurantId);
     }
 
-    private async Task AddToCartAsync(int productId)
+    private void OpenModal(ProductDto product)
     {
         if (!AuthState.IsAuthenticated)
         {
-            Navigation.NavigateTo("/login");
+            _showAuthPrompt = true;
             return;
         }
 
+        _modalProduct = product;
+        _modalQty = 1;
+        _modalNotes = string.Empty;
+    }
+
+    private void CloseModal() => _modalProduct = null;
+
+    private void ChangeQty(int delta) => _modalQty = Math.Max(1, _modalQty + delta);
+
+    private async Task AddToCartAsync()
+    {
+        if (_modalProduct is null) return;
+
+        _adding = true;
         try
         {
-            await CartApi.AddItem(new AddCartItemRequest(productId, 1));
-            _message = "Producto agregado al carrito.";
+            var cart = await CartApi.AddItem(new AddCartItemRequest(_modalProduct.Id, _modalQty,
+                string.IsNullOrWhiteSpace(_modalNotes) ? null : _modalNotes));
+
+            CartState.Bump(cart?.Items.Sum(i => i.Quantity) ?? 0);
+            _message = $"{_modalProduct.Name} agregado a tu pedido.";
+            _modalProduct = null;
         }
         catch (ApiException ex)
         {
             _message = ex.Message;
         }
+        finally
+        {
+            _adding = false;
+        }
     }
+
+    private void GoHome() => Navigation.NavigateTo("/");
 }

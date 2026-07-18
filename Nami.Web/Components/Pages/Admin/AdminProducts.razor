@@ -13,66 +13,90 @@
 }
 else
 {
-    <h3 class="mb-3">Productos</h3>
+    <h3 class="nami-heading" style="margin:0 0 18px; font-size:22px;">Productos</h3>
 
     @if (!string.IsNullOrEmpty(_message))
     {
         <div class="alert alert-info">@_message</div>
     }
 
-    <div class="card mb-4">
-        <div class="card-body">
-            <h5 class="card-title">Nuevo producto</h5>
-            <div class="row g-2">
-                <div class="col-md-3"><input class="form-control" placeholder="Nombre" @bind="_newName" /></div>
-                <div class="col-md-3"><input class="form-control" placeholder="Descripción" @bind="_newDescription" /></div>
-                <div class="col-md-2"><input type="number" step="0.01" class="form-control" placeholder="Precio" @bind="_newPrice" /></div>
-                <div class="col-md-1"><input type="number" class="form-control" placeholder="Stock" @bind="_newStock" /></div>
-                <div class="col-md-2">
-                    <select class="form-select" @bind="_newRestaurantId">
-                        <option value="0">Restaurante</option>
-                        @foreach (var restaurant in _restaurants)
-                        {
-                            <option value="@restaurant.Id">@restaurant.Name</option>
-                        }
-                    </select>
-                </div>
-                <div class="col-md-1">
-                    <select class="form-select" @bind="_newCategoryId">
-                        <option value="0">Categoría</option>
-                        @foreach (var category in _categories)
-                        {
-                            <option value="@category.Id">@category.Name</option>
-                        }
-                    </select>
-                </div>
+    <div class="nami-panel" style="padding:20px; margin-bottom:22px;">
+        <h5 class="nami-heading" style="margin:0 0 12px; font-size:15px;">@(_editingId is null ? "Nuevo producto" : $"Editando producto #{_editingId}")</h5>
+        <div class="row g-2">
+            <div class="col-md-3"><input class="nami-input" placeholder="Nombre" @bind="_form.Name" /></div>
+            <div class="col-md-3"><input class="nami-input" placeholder="Descripción" @bind="_form.Description" /></div>
+            <div class="col-md-2"><input type="number" step="0.01" class="nami-input" placeholder="Precio" @bind="_form.Price" /></div>
+            <div class="col-md-1"><input type="number" class="nami-input" placeholder="Stock" @bind="_form.Stock" /></div>
+            <div class="col-md-2">
+                <select class="nami-select" @bind="_form.RestaurantId" disabled="@(_editingId is not null)" title="@(_editingId is not null ? "El restaurante no se puede cambiar al editar." : "")">
+                    <option value="0">Restaurante</option>
+                    @foreach (var restaurant in _restaurants)
+                    {
+                        <option value="@restaurant.Id">@restaurant.Name</option>
+                    }
+                </select>
             </div>
-            <button class="btn btn-primary mt-2" @onclick="CreateAsync">Crear producto</button>
+            <div class="col-md-1">
+                <select class="nami-select" @bind="_form.CategoryId">
+                    <option value="0">Categoría</option>
+                    @foreach (var category in _categories)
+                    {
+                        <option value="@category.Id">@category.Name</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-8"><input class="nami-input" placeholder="URL de imagen (https://...)" @bind="_form.ImageUrl" /></div>
+        </div>
+        <div style="display:flex; gap:8px; margin-top:12px;">
+            @if (_editingId is null)
+            {
+                <button class="nami-btn nami-btn-primary" @onclick="CreateAsync">Crear producto</button>
+            }
+            else
+            {
+                <button class="nami-btn nami-btn-primary" @onclick="SaveEditAsync">Guardar cambios</button>
+                <button class="nami-btn nami-btn-ghost" @onclick="CancelEdit">Cancelar</button>
+            }
         </div>
     </div>
 
     @if (_products is null)
     {
-        <p>Cargando...</p>
+        <div class="nami-skel" style="height:200px;"></div>
     }
     else
     {
-        <table class="table">
-            <thead><tr><th>Nombre</th><th>Restaurante</th><th>Categoría</th><th>Precio</th><th>Stock</th><th></th></tr></thead>
-            <tbody>
-                @foreach (var product in _products)
-                {
-                    <tr>
-                        <td>@product.Name</td>
-                        <td>@product.RestaurantName</td>
-                        <td>@product.CategoryName</td>
-                        <td>@product.Price.ToString("C")</td>
-                        <td>@product.Stock</td>
-                        <td><button class="btn btn-sm btn-outline-danger" @onclick="() => DeleteAsync(product.Id)">Eliminar</button></td>
-                    </tr>
-                }
-            </tbody>
-        </table>
+        <div class="nami-panel" style="padding:20px; overflow-x:auto;">
+            <table class="nami-table" style="min-width:760px;">
+                <thead><tr><th>Imagen</th><th>Nombre</th><th>Restaurante</th><th>Categoría</th><th style="text-align:right;">Precio</th><th>Stock</th><th style="text-align:right;">Acciones</th></tr></thead>
+                <tbody>
+                    @foreach (var product in _products)
+                    {
+                        <tr>
+                            <td>
+                                @if (!string.IsNullOrWhiteSpace(product.ImageUrl))
+                                {
+                                    <div style="width:40px; height:40px; border-radius:8px; background-size:cover; background-position:center; background-image:url('@product.ImageUrl');"></div>
+                                }
+                                else
+                                {
+                                    <div style="width:40px; height:40px; border-radius:8px; background:var(--nami-ph2);"></div>
+                                }
+                            </td>
+                            <td style="font-weight:700;">@product.Name</td>
+                            <td style="color:var(--nami-muted);">@product.RestaurantName</td>
+                            <td>@product.CategoryName</td>
+                            <td style="text-align:right; font-weight:700;">@product.Price.ToString("C")</td>
+                            <td>@product.Stock</td>
+                            <td style="text-align:right; white-space:nowrap;">
+                                <button class="nami-btn nami-btn-ghost nami-btn-sm" @onclick="() => StartEdit(product)">Editar</button>
+                                <button class="nami-btn nami-btn-sm" style="color:var(--nami-danger);" @onclick="() => DeleteAsync(product.Id)">Eliminar</button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
     }
 }
 
@@ -81,12 +105,8 @@ else
     private List<RestaurantDto> _restaurants = [];
     private List<CategoryDto> _categories = [];
 
-    private string _newName = string.Empty;
-    private string _newDescription = string.Empty;
-    private decimal _newPrice;
-    private int _newStock;
-    private int _newRestaurantId;
-    private int _newCategoryId;
+    private int? _editingId;
+    private readonly ProductFormModel _form = new();
     private string? _message;
 
     protected override async Task OnInitializedAsync()
@@ -106,7 +126,7 @@ else
 
     private async Task CreateAsync()
     {
-        if (string.IsNullOrWhiteSpace(_newName) || _newRestaurantId == 0 || _newCategoryId == 0)
+        if (string.IsNullOrWhiteSpace(_form.Name) || _form.RestaurantId == 0 || _form.CategoryId == 0)
         {
             _message = "Completa nombre, restaurante y categoría.";
             return;
@@ -115,11 +135,55 @@ else
         try
         {
             await CatalogApi.CreateProduct(new CreateProductRequest(
-                _newName, _newDescription, _newPrice, _newStock, _newRestaurantId, _newCategoryId));
+                _form.Name, _form.Description, _form.Price, _form.Stock, _form.RestaurantId, _form.CategoryId,
+                string.IsNullOrWhiteSpace(_form.ImageUrl) ? null : _form.ImageUrl));
 
-            _newName = _newDescription = string.Empty;
-            _newPrice = 0;
-            _newStock = 0;
+            _form.Reset();
+            await LoadAsync();
+        }
+        catch (ApiException ex)
+        {
+            _message = ex.Message;
+        }
+    }
+
+    private void StartEdit(ProductDto product)
+    {
+        _editingId = product.Id;
+        _form.Name = product.Name;
+        _form.Description = product.Description;
+        _form.Price = product.Price;
+        _form.Stock = product.Stock;
+        _form.RestaurantId = product.RestaurantId;
+        _form.CategoryId = product.CategoryId;
+        _form.ImageUrl = product.ImageUrl ?? string.Empty;
+        _message = null;
+    }
+
+    private void CancelEdit()
+    {
+        _editingId = null;
+        _form.Reset();
+    }
+
+    private async Task SaveEditAsync()
+    {
+        if (_editingId is null) return;
+
+        if (string.IsNullOrWhiteSpace(_form.Name) || _form.CategoryId == 0)
+        {
+            _message = "Completa nombre y categoría.";
+            return;
+        }
+
+        try
+        {
+            await CatalogApi.UpdateProduct(_editingId.Value, new UpdateProductRequest(
+                _form.Name, _form.Description, _form.Price, _form.Stock, _form.CategoryId,
+                string.IsNullOrWhiteSpace(_form.ImageUrl) ? null : _form.ImageUrl));
+
+            _editingId = null;
+            _form.Reset();
             await LoadAsync();
         }
         catch (ApiException ex)
@@ -133,11 +197,34 @@ else
         try
         {
             await CatalogApi.DeleteProduct(id);
+            if (_editingId == id) CancelEdit();
             await LoadAsync();
         }
         catch (ApiException ex)
         {
             _message = ex.Message;
+        }
+    }
+
+    private class ProductFormModel
+    {
+        public string Name { get; set; } = string.Empty;
+        public string Description { get; set; } = string.Empty;
+        public decimal Price { get; set; }
+        public int Stock { get; set; }
+        public int RestaurantId { get; set; }
+        public int CategoryId { get; set; }
+        public string ImageUrl { get; set; } = string.Empty;
+
+        public void Reset()
+        {
+            Name = string.Empty;
+            Description = string.Empty;
+            Price = 0;
+            Stock = 0;
+            RestaurantId = 0;
+            CategoryId = 0;
+            ImageUrl = string.Empty;
         }
     }
 }

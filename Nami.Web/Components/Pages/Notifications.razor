@@ -5,34 +5,41 @@
 
 <PageTitle>Notificaciones</PageTitle>
 
-<h3 class="mb-3">Notificaciones</h3>
+<section class="nami-fade">
+    <h3 class="nami-heading" style="margin:0 0 22px; font-size:26px;">Notificaciones</h3>
 
-@if (_notifications is null)
-{
-    <p>Cargando...</p>
-}
-else if (_notifications.Count == 0)
-{
-    <p class="text-muted">No tienes notificaciones.</p>
-}
-else
-{
-    <div class="list-group">
-        @foreach (var notification in _notifications)
-        {
-            <div class="list-group-item @(notification.IsRead ? "" : "list-group-item-warning")">
-                <div class="d-flex justify-content-between">
-                    <span>@notification.Message</span>
-                    <small class="text-muted">@notification.Date.ToLocalTime().ToString("g")</small>
+    @if (_notifications is null)
+    {
+        <div style="display:flex; flex-direction:column; gap:10px;">
+            <div class="nami-skel" style="height:60px;"></div>
+            <div class="nami-skel" style="height:60px;"></div>
+        </div>
+    }
+    else if (_notifications.Count == 0)
+    {
+        <div style="text-align:center; padding:60px 20px; background:var(--nami-panel); border:1px dashed var(--nami-border); border-radius:20px; color:var(--nami-muted);">
+            No tienes notificaciones.
+        </div>
+    }
+    else
+    {
+        <div style="display:flex; flex-direction:column; gap:10px;">
+            @foreach (var notification in _notifications)
+            {
+                <div class="nami-card" style="padding:16px 18px; @(notification.IsRead ? "" : "border-color:var(--nami-accent);")">
+                    <div style="display:flex; justify-content:space-between; gap:12px; align-items:baseline;">
+                        <span style="font-size:14.5px;">@notification.Message</span>
+                        <small style="color:var(--nami-muted); white-space:nowrap;">@notification.Date.ToLocalTime().ToString("g")</small>
+                    </div>
+                    @if (!notification.IsRead)
+                    {
+                        <button class="nami-btn nami-btn-sm" style="color:var(--nami-accent); padding:0; margin-top:6px;" @onclick="() => MarkAsReadAsync(notification.Id)">Marcar como leída</button>
+                    }
                 </div>
-                @if (!notification.IsRead)
-                {
-                    <button class="btn btn-sm btn-link p-0" @onclick="() => MarkAsReadAsync(notification.Id)">Marcar como leída</button>
-                }
-            </div>
-        }
-    </div>
-}
+            }
+        </div>
+    }
+</section>
 
 @code {
     private List<NotificationDto>? _notifications;

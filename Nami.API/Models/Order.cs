@@ -20,6 +20,11 @@ namespace Nami.API.Models
         public DateTime OrderDate { get; set; }
         public DateTime? DeliveryDate { get; set; }
         public string Address { get; set; } = string.Empty;
+        public double DeliveryLatitude { get; set; }
+        public double DeliveryLongitude { get; set; }
+
+        public int? DeliveryRating { get; set; }
+        public string? DeliveryRatingComment { get; set; }
 
         public ICollection<OrderDetail> OrderDetails { get; set; } = new List<OrderDetail>();
         public Payment? Payment { get; set; }

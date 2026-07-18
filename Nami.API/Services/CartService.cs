@@ -62,6 +62,8 @@ namespace Nami.API.Services
             if (existingItem is not null)
             {
                 existingItem.Quantity += request.Quantity;
+                if (request.Notes is not null)
+                    existingItem.Notes = request.Notes;
             }
             else
             {
@@ -70,7 +72,8 @@ namespace Nami.API.Services
                     CartId = cart.Id,
                     ProductId = product.Id,
                     Quantity = request.Quantity,
-                    UnitPrice = product.Price
+                    UnitPrice = product.Price,
+                    Notes = request.Notes
                 };
                 cart.Items.Add(newItem);
                 _context.CartItems.Add(newItem);

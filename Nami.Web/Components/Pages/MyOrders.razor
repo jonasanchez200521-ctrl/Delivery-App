@@ -5,44 +5,42 @@
 
 <PageTitle>Mis pedidos</PageTitle>
 
-<h3 class="mb-3">Mis pedidos</h3>
+<section class="nami-fade">
+    <h2 class="nami-heading" style="margin:0 0 22px; font-size:28px;">Mis pedidos</h2>
 
-@if (_orders is null)
-{
-    <p>Cargando...</p>
-}
-else if (_orders.Count == 0)
-{
-    <p class="text-muted">Todavía no has realizado pedidos.</p>
-}
-else
-{
-    <table class="table">
-        <thead>
-            <tr>
-                <th>#</th>
-                <th>Restaurante</th>
-                <th>Fecha</th>
-                <th>Total</th>
-                <th>Estado</th>
-                <th></th>
-            </tr>
-        </thead>
-        <tbody>
+    @if (_orders is null)
+    {
+        <div style="display:flex; flex-direction:column; gap:12px;">
+            @for (var i = 0; i < 3; i++)
+            {
+                <div class="nami-skel" style="height:80px;"></div>
+            }
+        </div>
+    }
+    else if (_orders.Count == 0)
+    {
+        <div style="text-align:center; padding:70px 20px; background:var(--nami-panel); border:1px dashed var(--nami-border); border-radius:20px;">
+            <p style="margin:0 0 16px; color:var(--nami-muted); font-size:16px;">Todavía no has realizado pedidos.</p>
+            <a class="nami-btn nami-btn-primary" href="/">Explorar restaurantes</a>
+        </div>
+    }
+    else
+    {
+        <div style="display:flex; flex-direction:column; gap:12px;">
             @foreach (var order in _orders)
             {
-                <tr>
-                    <td>@order.Id</td>
-                    <td>@order.RestaurantName</td>
-                    <td>@order.OrderDate.ToLocalTime().ToString("g")</td>
-                    <td>@order.Total.ToString("C")</td>
-                    <td><span class="badge bg-info text-dark">@order.Status</span></td>
-                    <td><a class="btn btn-sm btn-outline-primary" href="/pedido/@order.Id">Ver</a></td>
-                </tr>
+                <a href="/pedido/@order.Id" class="nami-card nami-card-hover" style="display:flex; align-items:center; gap:16px; padding:18px 20px; text-decoration:none; color:inherit; flex-wrap:wrap;">
+                    <div style="flex:1; min-width:180px;">
+                        <div class="nami-heading" style="font-size:15.5px;">Pedido #@order.Id · @order.RestaurantName</div>
+                        <div style="color:var(--nami-muted); font-size:13px; margin-top:3px;">@order.OrderDate.ToLocalTime().ToString("g")</div>
+                    </div>
+                    <span class="nami-badge" style="background:@OrderStatusStyle.Bg(order.Status); color:@OrderStatusStyle.Fg(order.Status);">@OrderStatusStyle.Label(order.Status)</span>
+                    <div style="font-weight:800; font-size:16px; min-width:80px; text-align:right;">@order.Total.ToString("C")</div>
+                </a>
             }
-        </tbody>
-    </table>
-}
+        </div>
+    }
+</section>
 
 @code {
     private List<OrderDto>? _orders;

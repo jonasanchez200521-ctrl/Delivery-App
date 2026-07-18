@@ -1,9 +1,19 @@
 ﻿@inherits LayoutComponentBase
+@implements IDisposable
+@inject ThemeState ThemeState
 
-<NavMenu />
+<div class="nami-root" data-nami-theme="@ThemeState.Current">
+    <NavMenu />
 
-<div class="container pb-5">
-    @Body
+    <div class="nami-container pb-5">
+        @Body
+    </div>
+
+    <footer style="border-top:1px solid var(--nami-border); margin-top:40px; padding:24px clamp(16px,4vw,40px); color:var(--nami-muted); font-size:13px;">
+        <div style="max-width:1200px; margin:0 auto; display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap;">
+            <span>Ñami · entrega de comida</span><span>Quito, Ecuador</span>
+        </div>
+    </footer>
 </div>
 
 <div id="blazor-error-ui" data-nosnippet>
@@ -11,3 +21,15 @@
     <a href="." class="reload">Reload</a>
     <span class="dismiss">🗙</span>
 </div>
+
+@code {
+    protected override void OnInitialized()
+    {
+        ThemeState.OnChange += StateHasChanged;
+    }
+
+    public void Dispose()
+    {
+        ThemeState.OnChange -= StateHasChanged;
+    }
+}

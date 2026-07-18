@@ -9,9 +9,11 @@ namespace Nami.API.Mappers
             item.Id,
             item.ProductId,
             item.Product?.Name ?? string.Empty,
+            item.Product?.ImageUrl,
             item.Quantity,
             item.UnitPrice,
-            item.Subtotal);
+            item.Subtotal,
+            item.Notes);
 
         public static CartDto ToDto(this Cart cart) => new(
             cart.Id,

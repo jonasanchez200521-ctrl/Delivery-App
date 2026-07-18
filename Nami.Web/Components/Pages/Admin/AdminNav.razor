@@ -1,9 +1,15 @@
-<ul class="nav nav-pills mb-4">
-    <li class="nav-item"><a class="nav-link" href="/admin">Dashboard</a></li>
-    <li class="nav-item"><a class="nav-link" href="/admin/restaurantes">Restaurantes</a></li>
-    <li class="nav-item"><a class="nav-link" href="/admin/categorias">Categorías</a></li>
-    <li class="nav-item"><a class="nav-link" href="/admin/productos">Productos</a></li>
-    <li class="nav-item"><a class="nav-link" href="/admin/promociones">Promociones</a></li>
-    <li class="nav-item"><a class="nav-link" href="/admin/usuarios">Usuarios</a></li>
-    <li class="nav-item"><a class="nav-link" href="/admin/pedidos">Pedidos</a></li>
-</ul>
+@inject NavigationManager Navigation
+
+<nav style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:26px;">
+    <a class="nami-chip @(IsActive("/admin") ? "nami-chip-active" : "")" href="/admin">Dashboard</a>
+    <a class="nami-chip @(IsActive("/admin/restaurantes") ? "nami-chip-active" : "")" href="/admin/restaurantes">Restaurantes</a>
+    <a class="nami-chip @(IsActive("/admin/categorias") ? "nami-chip-active" : "")" href="/admin/categorias">Categorías</a>
+    <a class="nami-chip @(IsActive("/admin/productos") ? "nami-chip-active" : "")" href="/admin/productos">Productos</a>
+    <a class="nami-chip @(IsActive("/admin/promociones") ? "nami-chip-active" : "")" href="/admin/promociones">Promociones</a>
+    <a class="nami-chip @(IsActive("/admin/usuarios") ? "nami-chip-active" : "")" href="/admin/usuarios">Usuarios</a>
+    <a class="nami-chip @(IsActive("/admin/pedidos") ? "nami-chip-active" : "")" href="/admin/pedidos">Pedidos</a>
+</nav>
+
+@code {
+    private bool IsActive(string path) => "/" + Navigation.ToBaseRelativePath(Navigation.Uri) == path;
+}

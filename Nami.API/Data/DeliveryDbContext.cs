@@ -115,6 +115,7 @@ namespace Nami.API.Data
             modelBuilder.Entity<CartItem>(entity =>
             {
                 entity.Property(ci => ci.UnitPrice).HasColumnType("decimal(18,2)");
+                entity.Property(ci => ci.Notes).HasMaxLength(250);
 
                 entity.HasOne(ci => ci.Cart)
                     .WithMany(c => c.Items)
@@ -151,6 +152,7 @@ namespace Nami.API.Data
             {
                 entity.Property(od => od.UnitPrice).HasColumnType("decimal(18,2)");
                 entity.Property(od => od.Subtotal).HasColumnType("decimal(18,2)");
+                entity.Property(od => od.Notes).HasMaxLength(250);
 
                 entity.HasOne(od => od.Order)
                     .WithMany(o => o.OrderDetails)

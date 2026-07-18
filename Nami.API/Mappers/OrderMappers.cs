@@ -11,7 +11,8 @@ namespace Nami.API.Mappers
             detail.Product?.Name ?? string.Empty,
             detail.Quantity,
             detail.UnitPrice,
-            detail.Subtotal);
+            detail.Subtotal,
+            detail.Notes);
 
         public static OrderDto ToDto(this Order order) => new(
             order.Id,
@@ -26,6 +27,12 @@ namespace Nami.API.Mappers
             order.OrderDate,
             order.DeliveryDate,
             order.Address,
+            order.Restaurant?.Latitude ?? 0,
+            order.Restaurant?.Longitude ?? 0,
+            order.DeliveryLatitude,
+            order.DeliveryLongitude,
+            order.DeliveryRating,
+            order.DeliveryRatingComment,
             order.OrderDetails.Select(d => d.ToDto()).ToList());
     }
 }

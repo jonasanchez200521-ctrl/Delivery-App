@@ -11,7 +11,10 @@ namespace Nami.API.Mappers
             restaurant.Address,
             restaurant.Category,
             restaurant.Status,
-            restaurant.Rating);
+            restaurant.Rating,
+            restaurant.ImageUrl,
+            restaurant.Latitude,
+            restaurant.Longitude);
 
         public static CategoryDto ToDto(this Category category) => new(
             category.Id,
@@ -24,6 +27,7 @@ namespace Nami.API.Mappers
             product.Description,
             product.Price,
             product.Stock,
+            product.ImageUrl,
             product.RestaurantId,
             product.Restaurant?.Name ?? string.Empty,
             product.CategoryId,

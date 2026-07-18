@@ -6,6 +6,7 @@ namespace Nami.API.DTOs
         string Description,
         decimal Price,
         int Stock,
+        string? ImageUrl,
         int RestaurantId,
         string RestaurantName,
         int CategoryId,
@@ -17,12 +18,14 @@ namespace Nami.API.DTOs
         decimal Price,
         int Stock,
         int RestaurantId,
-        int CategoryId);
+        int CategoryId,
+        string? ImageUrl = null);
 
     public record UpdateProductRequest(
         string Name,
         string Description,
         decimal Price,
         int Stock,
-        int CategoryId);
+        int CategoryId,
+        string? ImageUrl = null);
 }

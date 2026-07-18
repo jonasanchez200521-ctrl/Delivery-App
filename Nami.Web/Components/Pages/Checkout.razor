@@ -1,0 +1,191 @@
+@page "/checkout"
+@inject CartApiService CartApi
+@inject OrderApiService OrderApi
+@inject PromotionApiService PromotionApi
+@inject AuthState AuthState
+@inject CartState CartState
+@inject NavigationManager Navigation
+
+<PageTitle>Finaliza tu pedido</PageTitle>
+
+<section class="nami-fade">
+    <button class="nami-btn" style="color:var(--nami-muted); padding:0; margin-bottom:18px;" @onclick="GoCart">← Volver al carrito</button>
+    <h2 class="nami-heading" style="margin:0 0 22px; font-size:28px;">Finaliza tu pedido</h2>
+
+    @if (_cart is null)
+    {
+        <div class="nami-grid-2">
+            <div class="nami-skel" style="height:320px;"></div>
+            <div class="nami-skel" style="height:260px;"></div>
+        </div>
+    }
+    else if (_cart.Items.Count == 0)
+    {
+        <div style="text-align:center; padding:70px 20px; background:var(--nami-panel); border:1px dashed var(--nami-border); border-radius:20px;">
+            <p style="margin:0 0 16px; color:var(--nami-muted); font-size:16px;">Tu carrito está vacío.</p>
+            <a class="nami-btn nami-btn-primary" href="/">Explorar restaurantes</a>
+        </div>
+    }
+    else
+    {
+        @if (!string.IsNullOrEmpty(_error))
+        {
+            <div class="alert alert-danger">@_error</div>
+        }
+
+        <div class="nami-grid-2">
+            <div style="display:flex; flex-direction:column; gap:16px;">
+                <div class="nami-panel" style="padding:22px 24px;">
+                    <h3 class="nami-heading" style="margin:0 0 12px; font-size:16px;"><span style="color:var(--nami-accent); margin-right:8px;">1</span>Dirección de entrega</h3>
+                    <input class="nami-input" value="@_address" @oninput="e => _address = e.Value?.ToString() ?? string.Empty" />
+                </div>
+
+                <div class="nami-panel" style="padding:22px 24px;">
+                    <h3 class="nami-heading" style="margin:0 0 14px; font-size:16px;"><span style="color:var(--nami-accent); margin-right:8px;">2</span>Método de pago</h3>
+                    <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:10px;">
+                        @foreach (var pm in _paymentMethods)
+                        {
+                            <div class="nami-card @(_paymentMethod == pm.Value ? "" : "")" style="cursor:pointer; padding:14px 16px; border-color:@(_paymentMethod == pm.Value ? "var(--nami-accent)" : "var(--nami-border)"); background:@(_paymentMethod == pm.Value ? "var(--nami-accent-soft)" : "var(--nami-card)");"
+                                 @onclick="() => _paymentMethod = pm.Value">
+                                <div style="display:flex; align-items:center; gap:7px; font-weight:700; font-size:14px;">
+                                    <span style="color:var(--nami-accent);">@(_paymentMethod == pm.Value ? "●" : "○")</span>@pm.Label
+                                </div>
+                                <div style="color:var(--nami-muted); font-size:12px; margin-top:4px;">@pm.Desc</div>
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                <div class="nami-panel" style="padding:22px 24px;">
+                    <h3 class="nami-heading" style="margin:0 0 12px; font-size:16px;"><span style="color:var(--nami-accent); margin-right:8px;">3</span>Cupón (opcional)</h3>
+                    <div style="display:flex; gap:8px;">
+                        <input class="nami-input nami-input-pill" style="flex:1;" placeholder="Código de promoción" value="@_promoCode" @oninput="e => _promoCode = e.Value?.ToString() ?? string.Empty" />
+                        <button class="nami-btn nami-btn-outline" @onclick="ApplyCouponAsync">Aplicar</button>
+                    </div>
+                    @if (!string.IsNullOrEmpty(_couponMessage))
+                    {
+                        <div style="font-size:12.5px; font-weight:600; color:@(_couponValid ? "var(--nami-accent)" : "var(--nami-danger)"); margin-top:8px;">@_couponMessage</div>
+                    }
+                </div>
+            </div>
+
+            <div class="nami-panel" style="padding:24px;">
+                <h3 class="nami-heading" style="margin:0 0 16px; font-size:18px;">Resumen</h3>
+                <div style="display:flex; flex-direction:column; gap:10px; font-size:14.5px;">
+                    <div style="display:flex; justify-content:space-between;"><span style="color:var(--nami-muted);">Subtotal</span><span style="font-weight:600;">@_cart.Subtotal.ToString("C")</span></div>
+                    @if (_appliedDiscountPercent > 0)
+                    {
+                        <div style="display:flex; justify-content:space-between;"><span style="color:var(--nami-accent);">Descuento (@_appliedDiscountPercent%)</span><span style="font-weight:600; color:var(--nami-accent);">−@DiscountAmount.ToString("C")</span></div>
+                    }
+                    <div style="display:flex; justify-content:space-between;"><span style="color:var(--nami-muted);">IVA (15%)</span><span style="font-weight:600;">@IvaAmount.ToString("C")</span></div>
+                    <div style="display:flex; justify-content:space-between;"><span style="color:var(--nami-muted);">Pago</span><span style="font-weight:600;">@CurrentPaymentLabel</span></div>
+                    <div style="display:flex; justify-content:space-between; border-top:1px solid var(--nami-border); padding-top:12px; font-size:17px; font-weight:800;" class="nami-heading"><span>Total</span><span style="color:var(--nami-accent);">@TotalAmount.ToString("C")</span></div>
+                </div>
+                <button class="nami-btn nami-btn-primary nami-btn-block" style="margin-top:18px; padding:14px;" disabled="@_placing" @onclick="ConfirmOrderAsync">
+                    @(_placing ? "Procesando…" : "Confirmar pedido")
+                </button>
+            </div>
+        </div>
+    }
+</section>
+
+@code {
+    private CartDto? _cart;
+    private string _address = string.Empty;
+    private PaymentMethod _paymentMethod = PaymentMethod.Cash;
+    private string _promoCode = string.Empty;
+    private string? _couponMessage;
+    private bool _couponValid;
+    private decimal _appliedDiscountPercent;
+    private string? _error;
+    private bool _placing;
+
+    private readonly record struct PaymentOption(PaymentMethod Value, string Label, string Desc);
+
+    private readonly List<PaymentOption> _paymentMethods =
+    [
+        new(PaymentMethod.Cash, "Efectivo", "Pagas al recibir"),
+        new(PaymentMethod.Card, "Tarjeta", "Débito o crédito"),
+        new(PaymentMethod.Transfer, "Transferencia", "Pago bancario")
+    ];
+
+    private string CurrentPaymentLabel => _paymentMethods.First(p => p.Value == _paymentMethod).Label;
+    private decimal DiscountAmount => Math.Round((_cart?.Subtotal ?? 0) * _appliedDiscountPercent / 100m, 2);
+    private decimal IvaAmount => Math.Round(((_cart?.Subtotal ?? 0) - DiscountAmount) * 0.15m, 2);
+    private decimal TotalAmount => (_cart?.Subtotal ?? 0) - DiscountAmount + IvaAmount;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!AuthState.IsAuthenticated)
+        {
+            Navigation.NavigateTo("/login");
+            return;
+        }
+
+        _address = AuthState.CurrentUser?.Address ?? string.Empty;
+        _cart = await CartApi.GetCart();
+    }
+
+    private async Task ApplyCouponAsync()
+    {
+        if (string.IsNullOrWhiteSpace(_promoCode))
+        {
+            _appliedDiscountPercent = 0;
+            _couponMessage = null;
+            return;
+        }
+
+        var promotions = await PromotionApi.GetAll();
+        var now = DateTime.UtcNow;
+        var match = promotions.FirstOrDefault(p =>
+            string.Equals(p.Code, _promoCode, StringComparison.OrdinalIgnoreCase) &&
+            p.IsActive && p.StartDate <= now && p.EndDate >= now);
+
+        if (match is null)
+        {
+            _appliedDiscountPercent = 0;
+            _couponValid = false;
+            _couponMessage = "Cupón inválido o expirado.";
+        }
+        else
+        {
+            _appliedDiscountPercent = match.Discount;
+            _couponValid = true;
+            _couponMessage = $"Cupón aplicado: {match.Discount}% de descuento.";
+        }
+    }
+
+    private async Task ConfirmOrderAsync()
+    {
+        if (string.IsNullOrWhiteSpace(_address))
+        {
+            _error = "Ingresa una dirección de entrega.";
+            return;
+        }
+
+        _placing = true;
+        _error = null;
+        try
+        {
+            var request = new CreateOrderRequest(_address, _paymentMethod,
+                _couponValid ? _promoCode : null);
+
+            var order = await OrderApi.Create(request);
+            if (order is not null)
+            {
+                CartState.SetCount(0);
+                Navigation.NavigateTo($"/pedido/{order.Id}");
+            }
+        }
+        catch (ApiException ex)
+        {
+            _error = ex.Message;
+        }
+        finally
+        {
+            _placing = false;
+        }
+    }
+
+    private void GoCart() => Navigation.NavigateTo("/carrito");
+}

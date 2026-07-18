@@ -14,6 +14,8 @@ namespace Nami.Web.Models
         string Password,
         DateTime DateBirth);
 
+    public record UnlockAccountRequest(string Email);
+
     public record UserDto(
         int Id,
         string FirstName,

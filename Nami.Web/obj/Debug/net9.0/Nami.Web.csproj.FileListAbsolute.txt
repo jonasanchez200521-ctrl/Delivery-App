@@ -20,9 +20,10 @@ C:\Users\User\OneDrive\Documents\GitHub\Delivery.Net\Delivery\Nami.Web\obj\Debug
 C:\Users\User\OneDrive\Documents\GitHub\Delivery.Net\Delivery\Nami.Web\obj\Debug\net9.0\scopedcss\Components\Layout\MainLayout.razor.rz.scp.css
 C:\Users\User\OneDrive\Documents\GitHub\Delivery.Net\Delivery\Nami.Web\obj\Debug\net9.0\scopedcss\bundle\Nami.Web.styles.css
 C:\Users\User\OneDrive\Documents\GitHub\Delivery.Net\Delivery\Nami.Web\obj\Debug\net9.0\scopedcss\projectbundle\Nami.Web.bundle.scp.css
-C:\Users\User\OneDrive\Documents\GitHub\Delivery.Net\Delivery\Nami.Web\obj\Debug\net9.0\compressed\eomzgr1n0l-{0}-4kywy7iv6g-4kywy7iv6g.gz
-C:\Users\User\OneDrive\Documents\GitHub\Delivery.Net\Delivery\Nami.Web\obj\Debug\net9.0\compressed\hva1ejtmrw-{0}-wgkpgtgfro-wgkpgtgfro.gz
-C:\Users\User\OneDrive\Documents\GitHub\Delivery.Net\Delivery\Nami.Web\obj\Debug\net9.0\compressed\9yuy55nvvv-{0}-wgkpgtgfro-wgkpgtgfro.gz
+C:\Users\User\OneDrive\Documents\GitHub\Delivery.Net\Delivery\Nami.Web\obj\Debug\net9.0\compressed\eomzgr1n0l-{0}-fx7jwm8x50-fx7jwm8x50.gz
+C:\Users\User\OneDrive\Documents\GitHub\Delivery.Net\Delivery\Nami.Web\obj\Debug\net9.0\compressed\pzywoge9gr-{0}-lnumucaas9-lnumucaas9.gz
+C:\Users\User\OneDrive\Documents\GitHub\Delivery.Net\Delivery\Nami.Web\obj\Debug\net9.0\compressed\hva1ejtmrw-{0}-4g6c69m8v2-4g6c69m8v2.gz
+C:\Users\User\OneDrive\Documents\GitHub\Delivery.Net\Delivery\Nami.Web\obj\Debug\net9.0\compressed\9yuy55nvvv-{0}-4g6c69m8v2-4g6c69m8v2.gz
 C:\Users\User\OneDrive\Documents\GitHub\Delivery.Net\Delivery\Nami.Web\obj\Debug\net9.0\staticwebassets.build.json
 C:\Users\User\OneDrive\Documents\GitHub\Delivery.Net\Delivery\Nami.Web\obj\Debug\net9.0\staticwebassets.build.json.cache
 C:\Users\User\OneDrive\Documents\GitHub\Delivery.Net\Delivery\Nami.Web\obj\Debug\net9.0\staticwebassets.development.json
@@ -33,4 +34,3 @@ C:\Users\User\OneDrive\Documents\GitHub\Delivery.Net\Delivery\Nami.Web\obj\Debug
 C:\Users\User\OneDrive\Documents\GitHub\Delivery.Net\Delivery\Nami.Web\obj\Debug\net9.0\Nami.Web.pdb
 C:\Users\User\OneDrive\Documents\GitHub\Delivery.Net\Delivery\Nami.Web\obj\Debug\net9.0\Nami.Web.genruntimeconfig.cache
 C:\Users\User\OneDrive\Documents\GitHub\Delivery.Net\Delivery\Nami.Web\obj\Debug\net9.0\ref\Nami.Web.dll
-C:\Users\User\OneDrive\Documents\GitHub\Delivery.Net\Delivery\Nami.Web\obj\Debug\net9.0\staticwebassets.upToDateCheck.txt

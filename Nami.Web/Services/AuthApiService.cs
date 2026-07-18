@@ -19,5 +19,10 @@ namespace Nami.Web.Services
 
         public Task RecoverPassword(string email) =>
             _api.PostAsync("api/auth/recover-password", new { email });
+
+        public Task UnlockAccount(string email) =>
+            _api.PostAsync("api/auth/unlock-account", new UnlockAccountRequest(email));
+
+        public Task Logout() => _api.PostAsync("api/auth/logout", new { });
     }
 }

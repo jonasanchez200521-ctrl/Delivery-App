@@ -1,94 +1,85 @@
 @page "/carrito"
 @inject CartApiService CartApi
-@inject OrderApiService OrderApi
 @inject AuthState AuthState
+@inject CartState CartState
 @inject NavigationManager Navigation
 
-<PageTitle>Carrito</PageTitle>
+<PageTitle>Tu carrito</PageTitle>
 
-<h3 class="mb-3">Mi carrito</h3>
+<section class="nami-fade">
+    <h2 class="nami-heading" style="margin:0 0 22px; font-size:28px;">Tu carrito</h2>
 
-@if (!string.IsNullOrEmpty(_error))
-{
-    <div class="alert alert-danger">@_error</div>
-}
+    @if (!string.IsNullOrEmpty(_error))
+    {
+        <div class="alert alert-danger">@_error</div>
+    }
 
-@if (_cart is null)
-{
-    <p>Cargando...</p>
-}
-else if (_cart.Items.Count == 0)
-{
-    <p class="text-muted">Tu carrito está vacío. <a href="/">Explora restaurantes</a>.</p>
-}
-else
-{
-    <table class="table align-middle">
-        <thead>
-            <tr>
-                <th>Producto</th>
-                <th>Precio</th>
-                <th>Cantidad</th>
-                <th>Subtotal</th>
-                <th></th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var item in _cart.Items)
-            {
-                <tr>
-                    <td>@item.ProductName</td>
-                    <td>@item.UnitPrice.ToString("C")</td>
-                    <td style="max-width:100px">
-                        <input type="number" min="1" class="form-control form-control-sm" value="@item.Quantity"
-                               @onchange="e => UpdateQuantityAsync(item.Id, e.Value)" />
-                    </td>
-                    <td>@item.Subtotal.ToString("C")</td>
-                    <td>
-                        <button class="btn btn-sm btn-outline-danger" @onclick="() => RemoveItemAsync(item.Id)">Quitar</button>
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
-
-    <div class="d-flex justify-content-end">
-        <h5>Subtotal: @_cart.Subtotal.ToString("C")</h5>
-    </div>
-
-    <hr />
-
-    <h5>Confirmar pedido</h5>
-    <div class="row">
-        <div class="col-md-6 mb-3">
-            <label class="form-label">Dirección de entrega</label>
-            <input class="form-control" @bind="_address" />
+    @if (_cart is null)
+    {
+        <div class="nami-grid-2">
+            <div class="nami-skel" style="height:200px;"></div>
+            <div class="nami-skel" style="height:260px;"></div>
         </div>
-        <div class="col-md-3 mb-3">
-            <label class="form-label">Método de pago</label>
-            <select class="form-select" @bind="_paymentMethod">
-                <option value="@PaymentMethod.Cash">Efectivo</option>
-                <option value="@PaymentMethod.Card">Tarjeta</option>
-                <option value="@PaymentMethod.Transfer">Transferencia</option>
-            </select>
+    }
+    else if (_cart.Items.Count == 0)
+    {
+        <div style="text-align:center; padding:70px 20px; background:var(--nami-panel); border:1px dashed var(--nami-border); border-radius:20px;">
+            <p style="margin:0 0 16px; color:var(--nami-muted); font-size:16px;">Tu carrito está vacío.</p>
+            <a class="nami-btn nami-btn-primary" href="/">Explorar restaurantes</a>
         </div>
-        <div class="col-md-3 mb-3">
-            <label class="form-label">Código de promoción (opcional)</label>
-            <input class="form-control" @bind="_promoCode" />
+    }
+    else
+    {
+        <div class="nami-grid-2">
+            <div style="display:flex; flex-direction:column; gap:12px;">
+                @foreach (var item in _cart.Items)
+                {
+                    <div class="nami-card" style="display:flex; align-items:center; gap:14px; padding:14px 16px;">
+                        <div class="nami-photo" style="width:56px; height:56px; flex-shrink:0; border-radius:10px; @(string.IsNullOrEmpty(item.ProductImageUrl) ? "" : $"background-image:url('{item.ProductImageUrl}');")"></div>
+                        <div style="flex:1; min-width:0;">
+                            <div class="nami-heading" style="font-size:15px;">@item.ProductName</div>
+                            <div style="color:var(--nami-muted); font-size:12.5px;">@item.UnitPrice.ToString("C")</div>
+                            @if (!string.IsNullOrWhiteSpace(item.Notes))
+                            {
+                                <div style="color:var(--nami-muted); font-size:11.5px; font-style:italic; margin-top:2px;">"@item.Notes"</div>
+                            }
+                        </div>
+                        <div style="display:flex; align-items:center; gap:10px; border:1px solid var(--nami-border); border-radius:999px; padding:4px 6px;">
+                            <button class="nami-icon-btn" style="width:26px; height:26px; font-size:15px; border:none;" @onclick="() => UpdateQuantityAsync(item, item.Quantity - 1)">−</button>
+                            <span style="font-weight:700; font-size:14px; min-width:16px; text-align:center;">@item.Quantity</span>
+                            <button class="nami-icon-btn" style="width:26px; height:26px; font-size:15px; border:none;" @onclick="() => UpdateQuantityAsync(item, item.Quantity + 1)">+</button>
+                        </div>
+                        <div style="font-weight:700; font-size:15px; min-width:64px; text-align:right;">@item.Subtotal.ToString("C")</div>
+                        <button class="nami-btn nami-btn-sm" style="color:var(--nami-danger);" @onclick="() => RemoveItemAsync(item.Id)">Quitar</button>
+                    </div>
+                }
+            </div>
+
+            <div class="nami-panel" style="padding:24px;">
+                <h3 class="nami-heading" style="margin:0 0 18px; font-size:18px;">Resumen</h3>
+                <div style="display:flex; flex-direction:column; gap:10px; font-size:14.5px;">
+                    <div style="display:flex; justify-content:space-between;"><span style="color:var(--nami-muted);">Subtotal</span><span style="font-weight:600;">@_cart.Subtotal.ToString("C")</span></div>
+                    <div style="display:flex; justify-content:space-between;"><span style="color:var(--nami-muted);">IVA (15%)</span><span style="font-weight:600;">@EstimatedIva.ToString("C")</span></div>
+                    <div style="display:flex; justify-content:space-between; border-top:1px solid var(--nami-border); padding-top:12px; font-size:17px; font-weight:800;" class="nami-heading"><span>Total estimado</span><span style="color:var(--nami-accent);">@EstimatedTotal.ToString("C")</span></div>
+                </div>
+                <p style="color:var(--nami-muted); font-size:12px; margin:10px 0 0;">El total final se calcula al confirmar, e incluye cualquier cupón aplicado.</p>
+            </div>
         </div>
-    </div>
-    <button class="btn btn-success" disabled="@_placing" @onclick="PlaceOrderAsync">
-        @(_placing ? "Procesando..." : "Confirmar pedido")
-    </button>
-}
+
+        <div class="nami-floating-bar">
+            <div class="nami-floating-bar-inner">
+                <button class="nami-btn nami-btn-primary nami-btn-block" @onclick="GoCheckout">Continuar — @EstimatedTotal.ToString("C")</button>
+            </div>
+        </div>
+    }
+</section>
 
 @code {
     private CartDto? _cart;
-    private string _address = string.Empty;
-    private PaymentMethod _paymentMethod = PaymentMethod.Cash;
-    private string _promoCode = string.Empty;
     private string? _error;
-    private bool _placing;
+
+    private decimal EstimatedIva => Math.Round((_cart?.Subtotal ?? 0) * 0.15m, 2);
+    private decimal EstimatedTotal => (_cart?.Subtotal ?? 0) + EstimatedIva;
 
     protected override async Task OnInitializedAsync()
     {
@@ -98,19 +89,27 @@ else
             return;
         }
 
-        _address = AuthState.CurrentUser?.Address ?? string.Empty;
         await LoadCartAsync();
     }
 
-    private async Task LoadCartAsync() => _cart = await CartApi.GetCart();
-
-    private async Task UpdateQuantityAsync(int itemId, object? value)
+    private async Task LoadCartAsync()
     {
-        if (value is null || !int.TryParse(value.ToString(), out var quantity) || quantity <= 0) return;
+        _cart = await CartApi.GetCart();
+        CartState.SetCount(_cart?.Items.Sum(i => i.Quantity) ?? 0);
+    }
+
+    private async Task UpdateQuantityAsync(CartItemDto item, int quantity)
+    {
+        if (quantity <= 0)
+        {
+            await RemoveItemAsync(item.Id);
+            return;
+        }
 
         try
         {
-            _cart = await CartApi.UpdateItem(itemId, new UpdateCartItemRequest(quantity));
+            _cart = await CartApi.UpdateItem(item.Id, new UpdateCartItemRequest(quantity));
+            CartState.SetCount(_cart?.Items.Sum(i => i.Quantity) ?? 0);
         }
         catch (ApiException ex)
         {
@@ -123,6 +122,7 @@ else
         try
         {
             _cart = await CartApi.RemoveItem(itemId);
+            CartState.SetCount(_cart?.Items.Sum(i => i.Quantity) ?? 0);
         }
         catch (ApiException ex)
         {
@@ -130,32 +130,5 @@ else
         }
     }
 
-    private async Task PlaceOrderAsync()
-    {
-        if (string.IsNullOrWhiteSpace(_address))
-        {
-            _error = "Ingresa una dirección de entrega.";
-            return;
-        }
-
-        _placing = true;
-        _error = null;
-        try
-        {
-            var request = new CreateOrderRequest(_address, _paymentMethod,
-                string.IsNullOrWhiteSpace(_promoCode) ? null : _promoCode);
-
-            var order = await OrderApi.Create(request);
-            if (order is not null)
-                Navigation.NavigateTo($"/pedido/{order.Id}");
-        }
-        catch (ApiException ex)
-        {
-            _error = ex.Message;
-        }
-        finally
-        {
-            _placing = false;
-        }
-    }
+    private void GoCheckout() => Navigation.NavigateTo("/checkout");
 }

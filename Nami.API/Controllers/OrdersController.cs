@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using Nami.API.DTOs;
+using Nami.API.Exceptions;
 using Nami.API.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -43,6 +44,42 @@ namespace Nami.API.Controllers
         public async Task<ActionResult<List<OrderDto>>> GetMyDeliveries() =>
             Ok(await _orderService.GetByDelivery(CurrentUserId));
 
+        [HttpGet("available")]
+        [Authorize(Roles = "Delivery")]
+        public async Task<ActionResult<List<OrderDto>>> GetAvailable() => Ok(await _orderService.GetAvailable());
+
+        [HttpPost("{id:int}/accept")]
+        [Authorize(Roles = "Delivery")]
+        public async Task<ActionResult<OrderDto>> Accept(int id)
+        {
+            try
+            {
+                return Ok(await _orderService.AcceptOrder(id, CurrentUserId));
+            }
+            catch (OrderConflictException ex)
+            {
+                return Conflict(new { message = ex.Message });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        [HttpPost("{id:int}/reject")]
+        [Authorize(Roles = "Delivery")]
+        public async Task<ActionResult<OrderDto>> Reject(int id)
+        {
+            try
+            {
+                return Ok(await _orderService.RejectOrder(id, CurrentUserId));
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
         [HttpGet]
         [Authorize(Roles = "Administrator")]
         public async Task<ActionResult<List<OrderDto>>> GetAll() => Ok(await _orderService.GetAll());
@@ -75,6 +112,20 @@ namespace Nami.API.Controllers
             try
             {
                 return Ok(await _orderService.AssignDelivery(id, request.DeliveryId));
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        [HttpPost("{id:int}/rate-delivery")]
+        [Authorize(Roles = "Client")]
+        public async Task<ActionResult<OrderDto>> RateDelivery(int id, RateDeliveryRequest request)
+        {
+            try
+            {
+                return Ok(await _orderService.RateDelivery(id, CurrentUserId, request));
             }
             catch (InvalidOperationException ex)
             {

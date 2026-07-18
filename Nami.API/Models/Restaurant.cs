@@ -11,6 +11,9 @@ namespace Nami.API.Models
         public string Category { get; set; } = string.Empty;
         public RestaurantStatus Status { get; set; } = RestaurantStatus.Active;
         public double Rating { get; set; }
+        public string? ImageUrl { get; set; }
+        public double Latitude { get; set; }
+        public double Longitude { get; set; }
 
         public ICollection<Product> Products { get; set; } = new List<Product>();
         public ICollection<Order> Orders { get; set; } = new List<Order>();

@@ -53,7 +53,8 @@ namespace Nami.API.Services
                 Price = request.Price,
                 Stock = request.Stock,
                 RestaurantId = request.RestaurantId,
-                CategoryId = request.CategoryId
+                CategoryId = request.CategoryId,
+                ImageUrl = request.ImageUrl
             };
 
             _context.Products.Add(product);
@@ -72,6 +73,7 @@ namespace Nami.API.Services
             product.Price = request.Price;
             product.Stock = request.Stock;
             product.CategoryId = request.CategoryId;
+            product.ImageUrl = request.ImageUrl;
 
             await _context.SaveChangesAsync();
             return (await GetById(product.Id))!;

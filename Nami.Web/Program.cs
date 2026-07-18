@@ -18,6 +18,8 @@ namespace Nami.Web
             builder.Services.AddScoped(_ => new HttpClient { BaseAddress = new Uri(apiBaseUrl) });
 
             builder.Services.AddScoped<AuthState>();
+            builder.Services.AddScoped<ThemeState>();
+            builder.Services.AddScoped<CartState>();
             builder.Services.AddScoped<ApiClient>();
             builder.Services.AddScoped<AuthApiService>();
             builder.Services.AddScoped<CatalogApiService>();

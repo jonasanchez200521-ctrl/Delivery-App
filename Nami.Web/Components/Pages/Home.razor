@@ -1,44 +1,106 @@
 @page "/"
 @inject CatalogApiService CatalogApi
+@inject AuthState AuthState
+@inject NavigationManager Navigation
 
-<PageTitle>Restaurantes</PageTitle>
+<PageTitle>Ñami</PageTitle>
 
-<h3 class="mb-4">Restaurantes disponibles</h3>
+<section class="nami-fade">
+    <div class="nami-panel" style="padding:clamp(28px,6vw,56px) clamp(20px,5vw,56px); margin-bottom:28px;">
+        <h1 class="nami-heading" style="font-size:clamp(28px,4.5vw,44px); margin:0 0 10px; max-width:560px; line-height:1.1;">
+            Tu antojo, en minutos<span style="color:var(--nami-accent);">.</span>
+        </h1>
+        <p style="color:var(--nami-muted); font-size:16px; margin:0 0 24px;">Restaurantes cerca de ti, entrega rápida.</p>
+        <div style="display:flex; gap:10px; max-width:560px; flex-wrap:wrap;">
+            <input class="nami-input nami-input-pill" style="flex:1; min-width:220px;" placeholder="Busca restaurantes o platos…"
+                   value="@_search" @oninput="OnSearchChanged" />
+            <button class="nami-btn nami-btn-primary" style="padding:14px 26px;">Buscar</button>
+        </div>
+    </div>
 
-@if (_restaurants is null)
-{
-    <p>Cargando...</p>
-}
-else if (_restaurants.Count == 0)
-{
-    <p class="text-muted">Aún no hay restaurantes registrados.</p>
-}
-else
-{
-    <div class="row g-3">
-        @foreach (var restaurant in _restaurants)
+    <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:26px;">
+        @foreach (var category in _categories)
         {
-            <div class="col-md-4">
-                <div class="card h-100">
-                    <div class="card-body">
-                        <h5 class="card-title">@restaurant.Name</h5>
-                        <h6 class="card-subtitle mb-2 text-muted">@restaurant.Category</h6>
-                        <p class="card-text small">@restaurant.Address</p>
-                        <p class="card-text">⭐ @restaurant.Rating.ToString("0.0")</p>
-                        <a href="/restaurante/@restaurant.Id" class="btn btn-primary btn-sm">Ver menú</a>
-                    </div>
-                </div>
-            </div>
+            <button class="nami-chip @(_activeCategory == category ? "nami-chip-active" : "")" @onclick="() => SetCategory(category)">@category</button>
         }
     </div>
-}
+
+    @if (_restaurants is null)
+    {
+        <div class="nami-grid-cards">
+            @for (var i = 0; i < 6; i++)
+            {
+                <div class="nami-card">
+                    <div class="nami-skel" style="height:150px; border-radius:18px 18px 0 0;"></div>
+                    <div style="padding:16px 18px 18px; display:flex; flex-direction:column; gap:10px;">
+                        <div class="nami-skel" style="height:16px; width:60%;"></div>
+                        <div class="nami-skel" style="height:12px; width:40%;"></div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else if (FilteredRestaurants.Count == 0)
+    {
+        <div style="text-align:center; padding:70px 20px; background:var(--nami-panel); border:1px dashed var(--nami-border); border-radius:20px;">
+            <p style="margin:0; color:var(--nami-muted); font-size:16px;">No encontramos restaurantes que coincidan con tu búsqueda.</p>
+        </div>
+    }
+    else
+    {
+        <div class="nami-grid-cards">
+            @foreach (var restaurant in FilteredRestaurants)
+            {
+                <a href="/restaurante/@restaurant.Id" class="nami-card nami-card-hover" style="display:block; overflow:hidden; text-decoration:none; color:inherit;">
+                    <div class="nami-photo" style="height:150px; @(string.IsNullOrEmpty(restaurant.ImageUrl) ? "" : $"background-image:url('{restaurant.ImageUrl}');")">
+                        @if (string.IsNullOrEmpty(restaurant.ImageUrl))
+                        {
+                            <span>foto · @restaurant.Name</span>
+                        }
+                    </div>
+                    <div style="padding:16px 18px 18px;">
+                        <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
+                            <h3 class="nami-heading" style="margin:0; font-size:17px;">@restaurant.Name</h3>
+                            <span class="nami-rating">★ @restaurant.Rating.ToString("0.0")</span>
+                        </div>
+                        <p style="margin:6px 0 12px; color:var(--nami-muted); font-size:13.5px;">@restaurant.Category · @restaurant.Address</p>
+                        <span class="nami-pill-tag">@(restaurant.Status == RestaurantStatus.Active ? "Abierto" : "Cerrado")</span>
+                    </div>
+                </a>
+            }
+        </div>
+    }
+</section>
 
 @code {
     private List<RestaurantDto>? _restaurants;
+    private string _search = string.Empty;
+    private string _activeCategory = "Todo";
+    private List<string> _categories = ["Todo"];
+
+    private List<RestaurantDto> FilteredRestaurants => (_restaurants ?? [])
+        .Where(r => _activeCategory == "Todo" || r.Category == _activeCategory)
+        .Where(r => string.IsNullOrWhiteSpace(_search) ||
+                    r.Name.Contains(_search, StringComparison.OrdinalIgnoreCase) ||
+                    r.Category.Contains(_search, StringComparison.OrdinalIgnoreCase))
+        .ToList();
 
     protected override async Task OnInitializedAsync()
     {
+        if (AuthState.IsAuthenticated && AuthState.Role is "Administrator" or "Delivery")
+        {
+            Navigation.NavigateTo(AuthState.Role == "Administrator" ? "/admin" : "/repartidor");
+            return;
+        }
+
         var all = await CatalogApi.GetRestaurants();
         _restaurants = all.Where(r => r.Status == RestaurantStatus.Active).ToList();
+        _categories = new List<string> { "Todo" }
+            .Concat(_restaurants.Select(r => r.Category).Distinct().OrderBy(c => c))
+            .ToList();
     }
+
+    private void OnSearchChanged(ChangeEventArgs e) => _search = e.Value?.ToString() ?? string.Empty;
+
+    private void SetCategory(string category) => _activeCategory = category;
 }

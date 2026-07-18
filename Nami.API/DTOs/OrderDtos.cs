@@ -8,7 +8,8 @@ namespace Nami.API.DTOs
         string ProductName,
         int Quantity,
         decimal UnitPrice,
-        decimal Subtotal);
+        decimal Subtotal,
+        string? Notes);
 
     public record OrderDto(
         int Id,
@@ -23,6 +24,12 @@ namespace Nami.API.DTOs
         DateTime OrderDate,
         DateTime? DeliveryDate,
         string Address,
+        double RestaurantLatitude,
+        double RestaurantLongitude,
+        double DeliveryLatitude,
+        double DeliveryLongitude,
+        int? DeliveryRating,
+        string? DeliveryRatingComment,
         List<OrderDetailDto> Details);
 
     // Crea la orden a partir del carrito actual del cliente autenticado.
@@ -31,4 +38,6 @@ namespace Nami.API.DTOs
     public record UpdateOrderStatusRequest(OrderStatus Status);
 
     public record AssignDeliveryRequest(int DeliveryId);
+
+    public record RateDeliveryRequest(int Rating, string? Comment);
 }

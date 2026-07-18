@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Nami.API")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+8fb59d6813ce35ca1dde4a2891eafe92e97c380f")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+c4916cf82b9f4af135d3e680c29660cbfeea60f3")]
 [assembly: System.Reflection.AssemblyProductAttribute("Nami.API")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Nami.API")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

@@ -2,11 +2,17 @@
 @inject AuthApiService AuthApi
 @inject NavigationManager Navigation
 
-<PageTitle>Crear cuenta</PageTitle>
+<PageTitle>Crear cuenta — Ñami</PageTitle>
 
-<div class="row justify-content-center">
-    <div class="col-md-6">
-        <h3 class="mb-3">Crear cuenta de cliente</h3>
+<section class="nami-fade" style="display:flex; justify-content:center; padding:clamp(10px,4vw,40px) 0;">
+    <div class="nami-panel nami-up" style="width:100%; max-width:520px; padding:32px;">
+        <div class="nami-heading" style="font-size:26px; text-align:center; margin-bottom:6px;">Ñami<span style="color:var(--nami-accent);">.</span></div>
+        <p style="text-align:center; color:var(--nami-muted); font-size:14px; margin:0 0 24px;">Crea tu cuenta y empieza a pedir.</p>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px; background:var(--nami-input); border:1px solid var(--nami-border); border-radius:999px; padding:5px; margin-bottom:24px;">
+            <a class="nami-btn" style="padding:9px; color:var(--nami-muted);" href="/login">Iniciar sesión</a>
+            <button class="nami-btn nami-btn-primary" style="padding:9px;">Registrarme</button>
+        </div>
 
         @if (!string.IsNullOrEmpty(_error))
         {
@@ -18,52 +24,55 @@
         }
 
         <EditForm Model="_model" OnValidSubmit="SubmitAsync">
-            <div class="row">
-                <div class="col-md-6 mb-3">
-                    <label class="form-label">Nombres</label>
-                    <InputText class="form-control" @bind-Value="_model.FirstName" />
+            <div style="display:flex; flex-direction:column; gap:14px;">
+                <div class="row g-2">
+                    <div class="col-md-6">
+                        <label class="nami-label">Nombres</label>
+                        <InputText class="nami-input" @bind-Value="_model.FirstName" />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="nami-label">Apellidos</label>
+                        <InputText class="nami-input" @bind-Value="_model.LastName" />
+                    </div>
                 </div>
-                <div class="col-md-6 mb-3">
-                    <label class="form-label">Apellidos</label>
-                    <InputText class="form-control" @bind-Value="_model.LastName" />
+                <div>
+                    <label class="nami-label">Correo electrónico</label>
+                    <InputText class="nami-input" placeholder="tucorreo@ejemplo.com" @bind-Value="_model.Email" />
                 </div>
-            </div>
-            <div class="mb-3">
-                <label class="form-label">Correo</label>
-                <InputText class="form-control" @bind-Value="_model.Email" />
-            </div>
-            <div class="mb-3">
-                <label class="form-label">Contraseña</label>
-                <InputText type="password" class="form-control" @bind-Value="_model.Password" />
-            </div>
-            <div class="mb-3">
-                <label class="form-label">Teléfono</label>
-                <InputText class="form-control" @bind-Value="_model.Phone" />
-            </div>
-            <div class="mb-3">
-                <label class="form-label">Dirección</label>
-                <InputText class="form-control" @bind-Value="_model.Address" />
-            </div>
-            <div class="row">
-                <div class="col-md-6 mb-3">
-                    <label class="form-label">Género</label>
-                    <InputSelect class="form-select" @bind-Value="_model.Gender">
-                        <option value="@Gender.Male">Masculino</option>
-                        <option value="@Gender.Female">Femenino</option>
-                        <option value="@Gender.Other">Otro</option>
-                    </InputSelect>
+                <div>
+                    <label class="nami-label">Contraseña</label>
+                    <InputText type="password" class="nami-input" placeholder="••••••••" @bind-Value="_model.Password" />
                 </div>
-                <div class="col-md-6 mb-3">
-                    <label class="form-label">Fecha de nacimiento</label>
-                    <InputDate class="form-control" @bind-Value="_model.DateBirth" />
+                <div>
+                    <label class="nami-label">Teléfono</label>
+                    <InputText class="nami-input" @bind-Value="_model.Phone" />
                 </div>
+                <div>
+                    <label class="nami-label">Dirección</label>
+                    <InputText class="nami-input" @bind-Value="_model.Address" />
+                </div>
+                <div class="row g-2">
+                    <div class="col-md-6">
+                        <label class="nami-label">Género</label>
+                        <InputSelect class="nami-select" @bind-Value="_model.Gender">
+                            <option value="@Gender.Male">Masculino</option>
+                            <option value="@Gender.Female">Femenino</option>
+                            <option value="@Gender.Other">Otro</option>
+                        </InputSelect>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="nami-label">Fecha de nacimiento</label>
+                        <InputDate class="nami-input" @bind-Value="_model.DateBirth" />
+                    </div>
+                </div>
+                <button class="nami-btn nami-btn-primary nami-btn-block" style="padding:14px; margin-top:4px;" type="submit" disabled="@_loading">
+                    @(_loading ? "Creando…" : "Crear cuenta")
+                </button>
+                <p style="text-align:center; color:var(--nami-muted); font-size:12.5px; margin:4px 0 0;">Al continuar aceptas los términos y condiciones.</p>
             </div>
-            <button class="btn btn-primary w-100" type="submit" disabled="@_loading">
-                @(_loading ? "Creando..." : "Crear cuenta")
-            </button>
         </EditForm>
     </div>
-</div>
+</section>
 
 @code {
     private readonly RegisterFormModel _model = new();

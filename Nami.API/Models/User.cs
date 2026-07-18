@@ -16,6 +16,7 @@ namespace Nami.API.Models
         public string PasswordHash { get; set; } = string.Empty;
         public DateTime DateBirth { get; set; }
         public UserStatus Status { get; set; } = UserStatus.Active;
+        public int FailedLoginAttempts { get; set; }
 
         public ICollection<Notification> Notifications { get; set; } = new List<Notification>();
 
